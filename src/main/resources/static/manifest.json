@@ -1,0 +1,16 @@
+{
+  "name": "Sri Balaji Traders & Enterprises",
+  "short_name": "Balaji Suite",
+  "description": "Sri Balaji Traders & Enterprises Management Suite",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0c0e",
+  "theme_color": "#d4af37",
+  "icons": [
+    {
+      "src": "assets/venkateswara.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
