@@ -4,7 +4,6 @@ services:
     env: docker
     plan: free
     region: oregon
-    startCommand: java -jar app.jar
     envVars:
       - key: PORT
         value: 8080
