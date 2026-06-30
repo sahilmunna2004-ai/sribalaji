@@ -40,7 +40,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: linear-gradient(rgba(12, 12, 14, 0.91), rgba(12, 12, 14, 0.93)), 
+    background: linear-gradient(rgba(12, 12, 14, 0.62), rgba(12, 12, 14, 0.70)), 
                 url('assets/venkateswara.jpg') no-repeat center center;
     background-size: cover;
     z-index: -10;

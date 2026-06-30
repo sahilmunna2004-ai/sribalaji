@@ -1,3 +1,26 @@
+// PWA Cache Buster: Unregister stale service worker and force reload if updated elements are missing
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', verifyPwaVersion);
+} else {
+    verifyPwaVersion();
+}
+
+function verifyPwaVersion() {
+    if (!document.getElementById('nav-traders')) {
+        console.warn("Stale HTML detected. Clearing service worker cache and reloading...");
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                for (let reg of registrations) reg.unregister();
+                caches.keys().then((keys) => {
+                    for (let key of keys) caches.delete(key);
+                }).then(() => {
+                    window.location.reload(true);
+                });
+            });
+        }
+    }
+}
+
 // API Base URL (Relative paths because frontend is served by the backend)
 const API_BASE = '/api';
 
