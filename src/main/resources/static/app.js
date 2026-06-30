@@ -356,10 +356,36 @@ function updateShopLabels() {
         digitizerUploadBtn.innerHTML = isTraders ? `<i class="fa-solid fa-upload"></i> Upload Invoice` : `<i class="fa-solid fa-upload"></i> Upload Notebook Page`;
     }
 
+    const welcomeTitle = document.getElementById('welcome-title');
+    const welcomeDescription = document.getElementById('welcome-description');
+    if (welcomeTitle) {
+        welcomeTitle.innerText = isTraders
+            ? "శ్రీ బాలాజీ ట్రేడర్స్ నిర్వహణ ప్యానెల్ కు స్వాగతం"
+            : "శ్రీ బాలాజీ ఎంటర్‌ప్రైజెస్ నిర్వహణ ప్యానెల్ కు స్వాగతం";
+    }
+    if (welcomeDescription) {
+        welcomeDescription.innerText = isTraders
+            ? "రైతుల వద్ద నుండి పత్తి, మిర్చి మొదలగు అన్ని రకాల పంట దిగుబడులు కొనుగోలు చేయబడును."
+            : "మా వద్ద అన్ని రకాల నాణ్యమైన విత్తనాలు (Seeds) మరియు ఎరువులు (Fertilizers) లభించును.";
+    }
+
     // Update Detail View static labels dynamically
     const detailCropLabel = document.getElementById('detail-crop-label');
     if (detailCropLabel) {
         detailCropLabel.innerText = isTraders ? "Items Supplied:" : "Crop details:";
+    }
+
+    const welcomeTitle = document.getElementById('welcome-title');
+    const welcomeDescription = document.getElementById('welcome-description');
+    if (welcomeTitle) {
+        welcomeTitle.innerText = isTraders
+            ? "శ్రీ బాలాజీ ట్రేడర్స్ నిర్వహణ ప్యానెల్ కు స్వాగతం"
+            : "శ్రీ బాలాజీ ఎంటర్‌ప్రైజెస్ నిర్వహణ ప్యానెల్ కు స్వాగతం";
+    }
+    if (welcomeDescription) {
+        welcomeDescription.innerText = isTraders
+            ? "రైతుల వద్ద నుండి పత్తి, మిర్చి మొదలగు అన్ని రకాల పంట దిగుబడులు కొనుగోలు చేయబడును."
+            : "మా వద్ద అన్ని రకాల నాణ్యమైన విత్తనాలు (Seeds) మరియు ఎరువులు (Fertilizers) లభించును.";
     }
 
     // 4. Ledger Titles & Labels
