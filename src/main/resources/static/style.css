@@ -1728,3 +1728,115 @@ input:focus, select:focus {
 .farmer-grid-actions button {
     width: 100%;
 }
+
+/* View Mode Toggles (Tile & List Mode overrides) */
+.farmer-placeholder-grid.tile-mode {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.farmer-placeholder-grid.tile-mode .farmer-grid-card {
+    padding: 12px;
+}
+
+.farmer-placeholder-grid.tile-mode .farmer-grid-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+}
+
+.farmer-placeholder-grid.tile-mode .farmer-grid-card h3 {
+    font-size: 0.95rem;
+    margin-top: 6px;
+}
+
+.farmer-placeholder-grid.tile-mode .farmer-grid-meta {
+    font-size: 0.72rem;
+    margin: 1px 0;
+}
+
+.farmer-placeholder-grid.tile-mode .crop-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    margin-top: 5px;
+}
+
+.farmer-placeholder-grid.tile-mode .farmer-grid-actions {
+    display: none; /* Card is fully clickable */
+}
+
+/* List Mode overrides */
+.farmer-placeholder-grid.list-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.farmer-placeholder-grid.list-mode .farmer-grid-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-radius: 6px;
+    gap: 16px;
+}
+
+.farmer-placeholder-grid.list-mode .farmer-grid-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.farmer-placeholder-grid.list-mode .farmer-grid-card h3 {
+    font-size: 1rem;
+    margin: 0;
+    flex: 2;
+    text-align: left;
+    margin-left: 10px;
+}
+
+.farmer-placeholder-grid.list-mode .farmer-grid-meta {
+    margin: 0;
+    flex: 2;
+    text-align: left;
+    font-size: 0.8rem;
+}
+
+.farmer-placeholder-grid.list-mode .crop-badge {
+    margin: 0;
+    flex: 1.5;
+    text-align: center;
+}
+
+.farmer-placeholder-grid.list-mode .farmer-grid-actions {
+    margin: 0;
+    flex: 1.5;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.farmer-placeholder-grid.list-mode .farmer-grid-actions button {
+    width: auto;
+    padding: 6px 12px;
+}
+
+/* Hover Animations and Styles */
+.main-ocr-uploader {
+    transition: var(--transition);
+}
+
+.main-ocr-uploader:hover {
+    border-color: var(--gold) !important;
+    background: rgba(212, 175, 55, 0.06) !important;
+}
+
+.business-nav-buttons button {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.business-nav-buttons button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25);
+}

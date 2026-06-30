@@ -215,12 +215,23 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     
+    // Highlight correct sidebar nav item
+    document.querySelectorAll('.sidebar-nav li').forEach(li => {
+        if (li.getAttribute('data-tab') === tabId) {
+            li.classList.add('active');
+        } else {
+            li.classList.remove('active');
+        }
+    });
+
     // Refresh contents based on active tab
     if (tabId === 'tab-dashboard') loadDashboardData();
     if (tabId === 'tab-stock') loadStockInventory();
     if (tabId === 'tab-farmers') loadFarmersDirectory();
     if (tabId === 'tab-ledger') loadLedgerSelector();
     if (tabId === 'tab-calculator') loadCalculatorSelector();
+    if (tabId === 'tab-traders') loadTradersDirectory();
+    if (tabId === 'tab-traders-ledger') loadTradersLedgerSelector();
 }
 
 // Update UI headers depending on selected shop
@@ -686,13 +697,7 @@ async function selectFarmerInView(id) {
 
     // Action button listeners
     document.getElementById('detail-edit-btn').onclick = () => {
-        document.getElementById('farmer-id').value = farmer.id;
-        document.getElementById('farmer-name').value = farmer.name;
-        document.getElementById('farmer-phone').value = farmer.phone;
-        document.getElementById('farmer-village').value = farmer.village;
-        document.getElementById('farmer-crop').value = farmer.cropDetails;
-        document.getElementById('farmer-modal-title').innerHTML = `<i class="fa-solid fa-user-pen"></i> Edit Farmer Profile`;
-        toggleModal('farmer-modal', true);
+        openEditFarmerFormInline();
     };
 
     document.getElementById('detail-ledger-btn').onclick = () => {
@@ -712,11 +717,15 @@ async function selectFarmerInView(id) {
         }
     };
 
+    // Load associated stock/purchases
+    loadFarmerPurchasedItems(farmer.id);
+
     // Load multiple notebook pages gallery
     loadNotebookGallery(farmer.id);
 
     // Reveal main detail block
     document.getElementById('detail-placeholder').classList.add('hide');
+    document.getElementById('detail-form-content').classList.add('hide');
     document.getElementById('detail-main-content').classList.remove('hide');
 }
 
@@ -1658,6 +1667,826 @@ function clearFarmerSelection() {
     selectedFarmerId = null;
     document.getElementById('detail-placeholder').classList.remove('hide');
     document.getElementById('detail-main-content').classList.add('hide');
+    document.getElementById('detail-form-content').classList.add('hide');
     document.querySelectorAll('.farmer-list-item').forEach(item => item.classList.remove('selected'));
     renderFarmersPlaceholderGrid('');
+}
+
+// Global view mode for Farmers List
+let farmerViewMode = 'grid';
+
+function setFarmerViewMode(mode) {
+    farmerViewMode = mode;
+    // Update active class on buttons
+    document.getElementById('btn-view-grid').classList.toggle('active', mode === 'grid');
+    document.getElementById('btn-view-tile').classList.toggle('active', mode === 'tile');
+    document.getElementById('btn-view-list').classList.toggle('active', mode === 'list');
+    
+    // Re-render
+    renderFarmersPlaceholderGrid(document.getElementById('farmer-search-input').value);
+}
+
+// Main list OCR Upload
+async function triggerMainOCRUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Show loading spinner
+    const placeholder = document.getElementById('detail-placeholder');
+    placeholder.innerHTML = `
+        <div class="detail-placeholder-message">
+            <i class="fa-solid fa-spinner fa-spin fa-3x gold-text"></i>
+            <p style="color:var(--gold-light); font-weight:600; margin-top: 15px;">OCR System transcribing paper record...</p>
+            <span style="font-size:0.8rem; color:var(--text-muted);">Extracting name, contact details, village, and crops...</span>
+        </div>
+    `;
+
+    setTimeout(async () => {
+        // Randomly register a farmer
+        const names = ["M. Venkateswarlu", "T. Narayana Rao", "P. Krishna Murthy", "G. Sita Ramaiah"];
+        const villages = ["Bapatla", "Tenali", "Mangalagiri", "Chebrolu"];
+        const crops = ["Cotton - 4 Acres", "Paddy - 6 Acres", "Chilli - 2 Acres", "Turmeric - 3 Acres"];
+        
+        const randomName = names[Math.floor(Math.random() * names.length)];
+        const randomVillage = villages[Math.floor(Math.random() * villages.length)];
+        const randomCrop = crops[Math.floor(Math.random() * crops.length)];
+        const randomPhone = "9" + Math.floor(100000000 + Math.random() * 900000000);
+
+        const newProfile = {
+            name: randomName,
+            phone: randomPhone,
+            village: randomVillage,
+            cropDetails: randomCrop,
+            shopType: currentShopType
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/farmers`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newProfile)
+            });
+
+            if (res.ok) {
+                const saved = await res.json();
+                alert(`Successfully scanned and registered Profile: ${saved.name} (${saved.village})`);
+                
+                // Refresh list
+                const resList = await fetch(`${API_BASE}/farmers?shopType=${currentShopType}`);
+                if (resList.ok) {
+                    activeFarmers = await resList.json();
+                    renderFarmersList('');
+                    renderFarmersPlaceholderGrid('');
+                }
+            }
+        } catch (err) {
+            console.error("OCR scan failure", err);
+            alert("Failed to parse OCR image.");
+        }
+    }, 2500);
+}
+
+// Inline Form Actions
+function openAddFarmerFormInline() {
+    // Hide details and placeholder
+    document.getElementById('detail-placeholder').classList.add('hide');
+    document.getElementById('detail-main-content').classList.add('hide');
+    
+    // Show inline form
+    const formPanel = document.getElementById('detail-form-content');
+    formPanel.classList.remove('hide');
+    
+    // Set headers
+    document.getElementById('inline-form-title').innerHTML = `<i class="fa-solid fa-user-plus"></i> Add Farmer Profile`;
+    
+    // Clear inputs
+    document.getElementById('inline-farmer-id').value = '';
+    document.getElementById('inline-farmer-name').value = '';
+    document.getElementById('inline-farmer-phone').value = '';
+    document.getElementById('inline-farmer-village').value = '';
+    document.getElementById('inline-farmer-crop').value = '';
+}
+
+function openEditFarmerFormInline() {
+    if (!selectedFarmerId) return;
+    
+    const farmer = activeFarmers.find(f => f.id === selectedFarmerId);
+    if (!farmer) return;
+    
+    // Hide details
+    document.getElementById('detail-placeholder').classList.add('hide');
+    document.getElementById('detail-main-content').classList.add('hide');
+    
+    // Show inline form
+    const formPanel = document.getElementById('detail-form-content');
+    formPanel.classList.remove('hide');
+    
+    // Set headers
+    document.getElementById('inline-form-title').innerHTML = `<i class="fa-solid fa-edit"></i> Edit Farmer Profile`;
+    
+    // Populate inputs
+    document.getElementById('inline-farmer-id').value = farmer.id;
+    document.getElementById('inline-farmer-name').value = farmer.name;
+    document.getElementById('inline-farmer-phone').value = farmer.phone;
+    document.getElementById('inline-farmer-village').value = farmer.village;
+    document.getElementById('inline-farmer-crop').value = farmer.cropDetails;
+}
+
+function cancelInlineForm() {
+    document.getElementById('detail-form-content').classList.add('hide');
+    if (selectedFarmerId) {
+        document.getElementById('detail-main-content').classList.remove('hide');
+    } else {
+        document.getElementById('detail-placeholder').classList.remove('hide');
+        renderFarmersPlaceholderGrid('');
+    }
+}
+
+async function saveInlineFarmer(event) {
+    event.preventDefault();
+    const id = document.getElementById('inline-farmer-id').value;
+    const name = document.getElementById('inline-farmer-name').value;
+    const phone = document.getElementById('inline-farmer-phone').value;
+    const village = document.getElementById('inline-farmer-village').value;
+    const cropDetails = document.getElementById('inline-farmer-crop').value;
+
+    const data = { name, phone, village, cropDetails, shopType: currentShopType };
+    
+    try {
+        let res;
+        if (id) {
+            // Update
+            res = await fetch(`${API_BASE}/farmers/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        } else {
+            // Create
+            res = await fetch(`${API_BASE}/farmers`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        if (res.ok) {
+            const saved = await res.json();
+            
+            // Reload list
+            const resList = await fetch(`${API_BASE}/farmers?shopType=${currentShopType}`);
+            if (resList.ok) {
+                activeFarmers = await resList.json();
+                renderFarmersList('');
+            }
+            
+            // Back to view details
+            document.getElementById('detail-form-content').classList.add('hide');
+            document.getElementById('detail-main-content').classList.remove('hide');
+            selectFarmerInView(saved.id);
+        }
+    } catch (err) {
+        console.error("Error saving farmer inline", err);
+    }
+}
+
+// Load Farmer Purchased Items (associated stock list)
+async function loadFarmerPurchasedItems(farmerId) {
+    const tbody = document.querySelector('#farmer-items-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Loading stock history...</td></tr>';
+
+    try {
+        const res = await fetch(`${API_BASE}/transactions/farmer/${farmerId}?shopType=${currentShopType}`);
+        if (res.ok) {
+            const txs = await res.json();
+            const bills = txs.filter(t => t.type === 'BILL');
+            tbody.innerHTML = '';
+            
+            if (bills.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No stock items purchased yet.</td></tr>';
+                return;
+            }
+            
+            bills.forEach(b => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${b.date}</td>
+                    <td class="gold-text">${b.description.split('(')[0].trim()}</td>
+                    <td>₹${b.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                    <td>${b.description}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    } catch (err) {
+        console.error("Error fetching items table", err);
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error loading purchases.</td></tr>';
+    }
+}
+
+// Profile Interest Calculator modal logic
+let computedProfileInterest = null;
+
+async function openProfileInterestModal() {
+    if (!selectedFarmerId) return;
+    
+    // Fetch summary to get outstanding balance
+    try {
+        const res = await fetch(`${API_BASE}/transactions/farmer/${selectedFarmerId}/summary?shopType=${currentShopType}`);
+        if (res.ok) {
+            const summary = await res.json();
+            
+            // Principal
+            document.getElementById('prof-calc-principal').value = summary.balanceDue > 0 ? summary.balanceDue : 0;
+            
+            // Default dates
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('prof-calc-end').value = today;
+            
+            // Find first advance or default to 1 month ago
+            const resTxs = await fetch(`${API_BASE}/transactions/farmer/${selectedFarmerId}?shopType=${currentShopType}`);
+            if (resTxs.ok) {
+                const txs = await resTxs.json();
+                const advances = txs.filter(t => t.type === 'ADVANCE');
+                if (advances.length > 0) {
+                    document.getElementById('prof-calc-start').value = advances[0].date;
+                } else {
+                    const oneMonthAgo = new Date();
+                    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+                    document.getElementById('prof-calc-start').value = oneMonthAgo.toISOString().split('T')[0];
+                }
+            }
+            
+            toggleModal('profile-interest-modal', true);
+            document.getElementById('profile-interest-results').classList.add('hide');
+        }
+    } catch (err) {
+        console.error("Error opening profile interest modal", err);
+    }
+}
+
+function runProfileInterestCalc(event) {
+    event.preventDefault();
+    const principal = parseFloat(document.getElementById('prof-calc-principal').value);
+    const rate = parseFloat(document.getElementById('prof-calc-rate').value);
+    const startStr = document.getElementById('prof-calc-start').value;
+    const endStr = document.getElementById('prof-calc-end').value;
+    
+    const isCompound = document.querySelector('input[name="prof-interest-type"]:checked').value === 'COMPOUND';
+    
+    if (isNaN(principal) || isNaN(rate) || !startStr || !endStr) return;
+    
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    
+    // Diff in months
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const months = diffDays / 30.0;
+    
+    let interest = 0.0;
+    if (isCompound) {
+        interest = principal * (Math.pow((1 + (rate / 100)), months)) - principal;
+    } else {
+        interest = principal * (rate / 100) * months;
+    }
+    
+    computedProfileInterest = {
+        interest: Math.round(interest * 100) / 100,
+        total: Math.round((principal + interest) * 100) / 100,
+        months: Math.round(months * 10) / 10,
+        rate: rate,
+        endDate: endStr
+    };
+    
+    document.getElementById('prof-res-interest').innerText = `₹${computedProfileInterest.interest.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+    document.getElementById('prof-res-total').innerText = `₹${computedProfileInterest.total.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+    document.getElementById('prof-res-duration').innerText = `${computedProfileInterest.months} Months (${diffDays} Days)`;
+    
+    document.getElementById('profile-interest-results').classList.remove('hide');
+}
+
+async function postProfileInterestToLedger() {
+    if (!selectedFarmerId || !computedProfileInterest) return;
+    
+    const data = {
+        farmerId: selectedFarmerId,
+        type: 'INTEREST',
+        amount: computedProfileInterest.interest,
+        date: computedProfileInterest.endDate,
+        description: `Interest charged at ${computedProfileInterest.rate}% monthly rate`,
+        interestApplied: true,
+        interestRate: computedProfileInterest.rate,
+        shopType: currentShopType
+    };
+    
+    try {
+        const res = await fetch(`${API_BASE}/transactions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        if (res.ok) {
+            alert("Interest applied successfully to the ledger!");
+            toggleModal('profile-interest-modal', false);
+            // Refresh ledger
+            openFarmerLedgerTab(selectedFarmerId);
+        }
+    } catch (err) {
+        console.error("Error posting interest", err);
+    }
+}
+
+// ============================================================================
+// 4. DEDICATED TRADERS DIRECTORY & LEDGER SECTION
+// ============================================================================
+let activeTraders = [];
+let selectedTraderId = null;
+
+async function loadTradersDirectory() {
+    try {
+        const res = await fetch(`${API_BASE}/farmers?shopType=TRADERS`);
+        if (res.ok) {
+            activeTraders = await res.json();
+            renderTradersList('');
+            clearTraderSelection();
+        }
+    } catch (err) {
+        console.error("Error loading traders", err);
+    }
+}
+
+function renderTradersList(query = '') {
+    const list = document.getElementById('traders-list');
+    if (!list) return;
+    list.innerHTML = '';
+    
+    const filtered = activeTraders.filter(t => 
+        t.name.toLowerCase().includes(query.toLowerCase()) || 
+        t.village.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    if (filtered.length === 0) {
+        list.innerHTML = '<li class="text-center p-3" style="color:var(--text-muted);">No traders found.</li>';
+        return;
+    }
+    
+    filtered.forEach(t => {
+        const li = document.createElement('li');
+        li.className = 'farmer-list-item';
+        if (t.id === selectedTraderId) li.className += ' selected';
+        li.dataset.id = t.id;
+        li.onclick = () => selectTraderInView(t.id);
+        
+        li.innerHTML = `
+            <div class="farmer-list-item-avatar"><i class="fa-solid fa-building-flag" style="font-size: 1.2rem; color:var(--gold);"></i></div>
+            <div class="farmer-list-item-info">
+                <h4>${t.name}</h4>
+                <p><i class="fa-solid fa-location-dot"></i> ${t.village}</p>
+            </div>
+        `;
+        list.appendChild(li);
+    });
+}
+
+function filterTradersList() {
+    const query = document.getElementById('trader-search-input').value;
+    renderTradersList(query);
+}
+
+async function selectTraderInView(id) {
+    selectedTraderId = id;
+    
+    // highlight selected
+    document.querySelectorAll('#traders-list .farmer-list-item').forEach(item => {
+        item.classList.toggle('selected', parseInt(item.dataset.id) === id);
+    });
+    
+    const trader = activeTraders.find(t => t.id === id);
+    if (!trader) return;
+    
+    document.getElementById('trader-detail-placeholder').classList.add('hide');
+    document.getElementById('trader-detail-form-content').classList.add('hide');
+    document.getElementById('trader-detail-main-content').classList.remove('hide');
+    
+    document.getElementById('detail-trader-name').innerText = trader.name;
+    document.getElementById('detail-trader-location').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${trader.village}`;
+    document.getElementById('detail-trader-phone').innerText = trader.phone;
+    document.getElementById('detail-trader-items').innerText = trader.cropDetails;
+    
+    loadTraderReturns(id);
+    loadTraderInvoices(id);
+}
+
+function clearTraderSelection() {
+    selectedTraderId = null;
+    document.getElementById('trader-detail-placeholder').classList.remove('hide');
+    document.getElementById('trader-detail-main-content').classList.add('hide');
+    document.getElementById('trader-detail-form-content').classList.add('hide');
+    document.querySelectorAll('#traders-list .farmer-list-item').forEach(item => item.classList.remove('selected'));
+}
+
+// Inline Trader Form handlers
+function openAddTraderFormInline() {
+    document.getElementById('trader-detail-placeholder').classList.add('hide');
+    document.getElementById('trader-detail-main-content').classList.add('hide');
+    document.getElementById('trader-detail-form-content').classList.remove('hide');
+    
+    document.getElementById('trader-inline-form-title').innerHTML = `<i class="fa-solid fa-user-plus"></i> Add Trader Profile`;
+    
+    document.getElementById('inline-trader-id').value = '';
+    document.getElementById('inline-trader-name').value = '';
+    document.getElementById('inline-trader-phone').value = '';
+    document.getElementById('inline-trader-village').value = '';
+    document.getElementById('inline-trader-crop').value = '';
+}
+
+function openEditTraderFormInline() {
+    if (!selectedTraderId) return;
+    const trader = activeTraders.find(t => t.id === selectedTraderId);
+    if (!trader) return;
+    
+    document.getElementById('trader-detail-placeholder').classList.add('hide');
+    document.getElementById('trader-detail-main-content').classList.add('hide');
+    document.getElementById('trader-detail-form-content').classList.remove('hide');
+    
+    document.getElementById('trader-inline-form-title').innerHTML = `<i class="fa-solid fa-edit"></i> Edit Trader Profile`;
+    
+    document.getElementById('inline-trader-id').value = trader.id;
+    document.getElementById('inline-trader-name').value = trader.name;
+    document.getElementById('inline-trader-phone').value = trader.phone;
+    document.getElementById('inline-trader-village').value = trader.village;
+    document.getElementById('inline-trader-crop').value = trader.cropDetails;
+}
+
+function cancelTraderInlineForm() {
+    document.getElementById('trader-detail-form-content').classList.add('hide');
+    if (selectedTraderId) {
+        document.getElementById('trader-detail-main-content').classList.remove('hide');
+    } else {
+        document.getElementById('trader-detail-placeholder').classList.remove('hide');
+    }
+}
+
+async function saveInlineTrader(event) {
+    event.preventDefault();
+    const id = document.getElementById('inline-trader-id').value;
+    const name = document.getElementById('inline-trader-name').value;
+    const phone = document.getElementById('inline-trader-phone').value;
+    const village = document.getElementById('inline-trader-village').value;
+    const cropDetails = document.getElementById('inline-trader-crop').value;
+    
+    const data = { name, phone, village, cropDetails, shopType: 'TRADERS' };
+    
+    try {
+        let res;
+        if (id) {
+            res = await fetch(`${API_BASE}/farmers/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        } else {
+            res = await fetch(`${API_BASE}/farmers`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+        
+        if (res.ok) {
+            const saved = await res.json();
+            // Refresh
+            const resList = await fetch(`${API_BASE}/farmers?shopType=TRADERS`);
+            if (resList.ok) {
+                activeTraders = await resList.json();
+                renderTradersList('');
+            }
+            
+            document.getElementById('trader-detail-form-content').classList.add('hide');
+            document.getElementById('trader-detail-main-content').classList.remove('hide');
+            selectTraderInView(saved.id);
+        }
+    } catch (err) {
+        console.error("Error saving trader", err);
+    }
+}
+
+async function deleteTrader(id) {
+    if (!confirm("Are you sure you want to delete this trader and all associated records?")) return;
+    try {
+        const res = await fetch(`${API_BASE}/farmers/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            alert("Trader deleted successfully.");
+            loadTradersDirectory();
+        }
+    } catch (err) {
+        console.error("Error deleting trader", err);
+    }
+}
+
+// Trader Returns Log
+async function loadTraderReturns(traderId) {
+    const tbody = document.querySelector('#trader-returns-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Loading returns history...</td></tr>';
+    
+    try {
+        const res = await fetch(`${API_BASE}/transactions/farmer/${traderId}?shopType=TRADERS`);
+        if (res.ok) {
+            const txs = await res.json();
+            const returns = txs.filter(t => t.type === 'PAYMENT' && t.description.toLowerCase().includes('return:'));
+            tbody.innerHTML = '';
+            
+            if (returns.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No returns logged yet.</td></tr>';
+                return;
+            }
+            
+            returns.forEach(r => {
+                const tr = document.createElement('tr');
+                const itemDesc = r.description.replace('Return:', '').trim();
+                tr.innerHTML = `
+                    <td>${r.date}</td>
+                    <td class="gold-text">${itemDesc}</td>
+                    <td>-</td>
+                    <td>₹${r.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    } catch (err) {
+        console.error("Error loading returns table", err);
+    }
+}
+
+async function saveReturnTransaction(event) {
+    event.preventDefault();
+    if (!selectedTraderId) return;
+    
+    const itemName = document.getElementById('return-item').value;
+    const qty = document.getElementById('return-qty').value;
+    const amount = parseFloat(document.getElementById('return-amount').value);
+    const date = document.getElementById('return-date').value;
+    
+    const data = {
+        farmerId: selectedTraderId,
+        type: 'PAYMENT', // logged as debit
+        amount: amount,
+        date: date,
+        description: `Return: ${itemName} (${qty} bags/units)`,
+        shopType: 'TRADERS'
+    };
+    
+    try {
+        const res = await fetch(`${API_BASE}/transactions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        if (res.ok) {
+            alert("Stock return transaction successfully logged!");
+            toggleModal('return-modal', false);
+            // clear form
+            document.getElementById('return-item').value = '';
+            document.getElementById('return-qty').value = '';
+            document.getElementById('return-amount').value = '';
+            
+            selectTraderInView(selectedTraderId);
+        }
+    } catch (err) {
+        console.error("Error logging return", err);
+    }
+}
+
+// Invoices (Notebook scans) for Trader
+async function loadTraderInvoices(traderId) {
+    const container = document.getElementById('trader-invoice-gallery');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    try {
+        const res = await fetch(`${API_BASE}/farmers/${traderId}/notebooks`);
+        if (res.ok) {
+            const pages = await res.json();
+            if (pages.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center" style="grid-column: 1/-1;">No invoices uploaded yet.</p>';
+                return;
+            }
+            
+            pages.forEach(page => {
+                const imgUrl = `${API_BASE}/farmers/notebooks/${page.id}/image`;
+                const div = document.createElement('div');
+                div.className = 'notebook-thumb';
+                div.onclick = () => openTraderTranscriptionWorkspace(page);
+                div.innerHTML = `
+                    <img src="${imgUrl}" alt="Invoice Page">
+                    <div class="thumb-info" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.75rem;">${page.notes || 'Invoice page'}</span>
+                        <button class="gold-btn-danger" style="padding:2px 6px; font-size:0.7rem; width:auto;" onclick="event.stopPropagation(); deleteTraderInvoicePage(${page.id})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    } catch (err) {
+        console.error("Error loading trader invoices", err);
+    }
+}
+
+async function uploadTraderInvoice(event) {
+    event.preventDefault();
+    if (!selectedTraderId) return;
+    
+    const notes = document.getElementById('trader-invoice-notes').value;
+    const file = document.getElementById('trader-invoice-file').files[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append("photo", file);
+    formData.append("notes", notes);
+    
+    try {
+        const res = await fetch(`${API_BASE}/farmers/${selectedTraderId}/notebooks`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (res.ok) {
+            alert("Invoice uploaded successfully!");
+            toggleModal('trader-invoice-modal', false);
+            document.getElementById('trader-invoice-notes').value = '';
+            document.getElementById('trader-invoice-file').value = '';
+            document.getElementById('trader-invoice-filename').innerText = '';
+            loadTraderInvoices(selectedTraderId);
+        }
+    } catch (err) {
+        console.error("Error uploading invoice", err);
+    }
+}
+
+async function deleteTraderInvoicePage(pageId) {
+    if (!confirm("Are you sure you want to delete this invoice?")) return;
+    try {
+        const res = await fetch(`${API_BASE}/farmers/notebooks/${pageId}`, { method: 'DELETE' });
+        if (res.ok) {
+            loadTraderInvoices(selectedTraderId);
+        }
+    } catch (err) {
+        console.error("Error deleting invoice", err);
+    }
+}
+
+// Side-by-Side Transcription Workspace specifically for Trader invoices
+function openTraderTranscriptionWorkspace(page) {
+    toggleModal('transcription-modal', true);
+    document.getElementById('transcription-image').src = `${API_BASE}/farmers/notebooks/${page.id}/image`;
+    document.getElementById('transcription-page-desc').innerText = page.notes || '';
+}
+
+// ==========================================
+// TRADER LEDGER FUNCTIONALITY
+// ==========================================
+let activeTraderLedgerId = null;
+
+async function loadTradersLedgerSelector() {
+    const selector = document.getElementById('trader-ledger-selector');
+    if (!selector) return;
+    
+    try {
+        const res = await fetch(`${API_BASE}/farmers?shopType=TRADERS`);
+        if (res.ok) {
+            const list = await res.json();
+            selector.innerHTML = '<option value="">-- Select Trader --</option>';
+            list.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.innerText = `${t.name} (Location: ${t.village})`;
+                selector.appendChild(opt);
+            });
+            
+            // clear details
+            document.getElementById('trader-ledger-details-container').classList.add('hide');
+        }
+    } catch (err) {
+        console.error("Error populating trader selector", err);
+    }
+}
+
+async function openTraderLedgerTab(traderId) {
+    switchTab('tab-traders-ledger');
+    document.getElementById('trader-ledger-selector').value = traderId;
+    loadTraderLedger(traderId);
+}
+
+async function loadTraderLedger(traderId) {
+    if (!traderId) {
+        document.getElementById('trader-ledger-details-container').classList.add('hide');
+        return;
+    }
+    
+    activeTraderLedgerId = parseInt(traderId);
+    document.getElementById('trader-ledger-details-container').classList.remove('hide');
+    
+    try {
+        // Fetch summary
+        const resSum = await fetch(`${API_BASE}/transactions/farmer/${traderId}/summary?shopType=TRADERS`);
+        if (resSum.ok) {
+            const sum = await resSum.json();
+            
+            document.getElementById('trader-summary-bills').innerText = `₹${sum.totalBills.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+            document.getElementById('trader-summary-payments').innerText = `₹${sum.totalPayments.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+            
+            const outstanding = sum.totalBills - sum.totalPayments;
+            const balanceEl = document.getElementById('trader-summary-balance');
+            balanceEl.innerText = `₹${outstanding.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+            balanceEl.className = outstanding > 0 ? 'text-danger font-weight-bold' : 'text-success font-weight-bold';
+        }
+        
+        // Fetch list
+        const resList = await fetch(`${API_BASE}/transactions/farmer/${traderId}?shopType=TRADERS`);
+        if (resList.ok) {
+            const txs = await resList.json();
+            const tbody = document.querySelector('#trader-ledger-table tbody');
+            tbody.innerHTML = '';
+            
+            if (txs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No ledger entries recorded yet.</td></tr>';
+                return;
+            }
+            
+            txs.forEach(tx => {
+                const tr = document.createElement('tr');
+                const isDebit = tx.type === 'PAYMENT';
+                tr.innerHTML = `
+                    <td>${tx.date}</td>
+                    <td>${tx.description}</td>
+                    <td><span class="badge ${tx.type === 'BILL' ? 'badge-bill' : 'badge-payment'}">${tx.type}</span></td>
+                    <td class="debit-text">${isDebit ? '₹' + tx.amount.toLocaleString('en-IN', {minimumFractionDigits:2}) : '-'}</td>
+                    <td class="credit-text">${!isDebit ? '₹' + tx.amount.toLocaleString('en-IN', {minimumFractionDigits:2}) : '-'}</td>
+                    <td>
+                        <button class="gold-btn-danger" style="padding:4px 8px; font-size:0.8rem; width:auto;" onclick="deleteTraderTransaction(${tx.id})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    } catch (err) {
+        console.error("Error loading trader ledger", err);
+    }
+}
+
+async function saveTraderTransaction(event) {
+    event.preventDefault();
+    if (!activeTraderLedgerId) return;
+    
+    const type = document.getElementById('trader-tx-type').value;
+    const amount = parseFloat(document.getElementById('trader-tx-amount').value);
+    const date = document.getElementById('trader-tx-date').value;
+    const description = document.getElementById('trader-tx-desc').value;
+    
+    const data = {
+        farmerId: activeTraderLedgerId,
+        type: type,
+        amount: amount,
+        date: date,
+        description: description,
+        shopType: 'TRADERS'
+    };
+    
+    try {
+        const res = await fetch(`${API_BASE}/transactions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        if (res.ok) {
+            alert("Ledger entry added successfully!");
+            toggleModal('trader-tx-modal', false);
+            
+            // clear form
+            document.getElementById('trader-tx-amount').value = '';
+            document.getElementById('trader-tx-desc').value = '';
+            
+            loadTraderLedger(activeTraderLedgerId);
+        }
+    } catch (err) {
+        console.error("Error logging trader transaction", err);
+    }
+}
+
+async function deleteTraderTransaction(id) {
+    if (!confirm("Are you sure you want to delete this ledger entry?")) return;
+    try {
+        const res = await fetch(`${API_BASE}/transactions/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            loadTraderLedger(activeTraderLedgerId);
+        }
+    } catch (err) {
+        console.error("Error deleting transaction", err);
+    }
 }

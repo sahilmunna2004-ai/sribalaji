@@ -110,17 +110,23 @@
                         <li class="active" data-tab="tab-dashboard" id="nav-dashboard">
                             <i class="fa-solid fa-chart-line"></i> <span>Dashboard</span>
                         </li>
-                        <li data-tab="tab-stock" id="nav-stock">
-                            <i class="fa-solid fa-boxes-stacked"></i> <span>Goods & Stock</span>
-                        </li>
                         <li data-tab="tab-farmers" id="nav-farmers">
-                            <i class="fa-solid fa-users"></i> <span id="nav-farmers-text">Farmers Directory</span>
+                            <i class="fa-solid fa-users"></i> <span>Farmers Directory</span>
                         </li>
                         <li data-tab="tab-ledger" id="nav-ledger">
-                            <i class="fa-solid fa-file-invoice-dollar"></i> <span id="nav-ledger-text">Farmer Ledger</span>
+                            <i class="fa-solid fa-file-invoice-dollar"></i> <span>Farmer Ledger</span>
                         </li>
                         <li data-tab="tab-calculator" id="nav-calculator">
                             <i class="fa-solid fa-calculator"></i> <span>Interest Calculator</span>
+                        </li>
+                        <li data-tab="tab-traders" id="nav-traders">
+                            <i class="fa-solid fa-handshake"></i> <span>Traders Directory</span>
+                        </li>
+                        <li data-tab="tab-traders-ledger" id="nav-traders-ledger">
+                            <i class="fa-solid fa-file-invoice-dollar"></i> <span>Trader Ledger</span>
+                        </li>
+                        <li data-tab="tab-stock" id="nav-stock">
+                            <i class="fa-solid fa-boxes-stacked"></i> <span>Goods & Stock</span>
                         </li>
                     </ul>
                 </nav>
@@ -161,11 +167,17 @@
                     <!-- Welcome details -->
                     <div class="glass-card welcome-panel">
                         <h2>Welcome to <span class="active-shop-label">Sri Balaji Traders</span> Management Suite</h2>
-                        <p>Use the sidebar to log stock purchases, track farmer ledger accounts, upload handwritten notebooks, and compute compound/simple interests for outstanding advances.</p>
-                        <div class="quick-actions">
-                            <button onclick="switchTab('tab-farmers')" class="gold-btn-outline"><i class="fa-solid fa-user-plus"></i> Farmers list & Digitize</button>
-                            <button onclick="switchTab('tab-stock')" class="gold-btn-outline"><i class="fa-solid fa-plus-circle"></i> Log Stock</button>
-                            <button onclick="switchTab('tab-calculator')" class="gold-btn-outline"><i class="fa-solid fa-calculator"></i> Calculate Interest</button>
+                        <p>Use the direct controls below or the sidebar navigation to track farmer ledger accounts, digitize handwritten notebooks, manage trader accounts, or calculate simple/compound interest on outstanding advances.</p>
+                        
+                        <div class="business-nav-buttons mt-4" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                            <button onclick="switchTab('tab-farmers')" class="gold-btn btn-lg" style="flex: 1; min-width: 250px; padding: 25px; font-size: 1.3rem; display: flex; flex-direction: column; align-items: center; gap: 10px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">
+                                <i class="fa-solid fa-users" style="font-size: 2.5rem;"></i>
+                                <span style="font-weight: 800; font-family: 'Cinzel', serif;">FARMERS MANAGEMENT</span>
+                            </button>
+                            <button onclick="switchTab('tab-traders')" class="gold-btn btn-lg" style="flex: 1; min-width: 250px; padding: 25px; font-size: 1.3rem; display: flex; flex-direction: column; align-items: center; gap: 10px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">
+                                <i class="fa-solid fa-handshake" style="font-size: 2.5rem;"></i>
+                                <span style="font-weight: 800; font-family: 'Cinzel', serif;">TRADERS / SUPPLIERS</span>
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -246,22 +258,43 @@
                     </div>
 
                     <div class="split-view-container mt-2">
-                        <!-- Left Column: Farmers List & Search -->
+                        <!-- Left Column: Farmers List, Search & View Toggles -->
                         <div class="split-left glass-card">
                             <div class="search-bar-container">
                                 <input type="text" id="farmer-search-input" placeholder="🔍 Search farmer by name/village...">
-                                <button class="gold-btn mt-2 btn-block" onclick="openAddFarmerModal()"><i class="fa-solid fa-user-plus"></i> Add New Farmer</button>
+                                <button class="gold-btn mt-2 btn-block" onclick="openAddFarmerFormInline()"><i class="fa-solid fa-user-plus"></i> Add New Farmer</button>
                             </div>
                             
-                            <div class="farmers-list-wrapper mt-3">
+                            <!-- Main OCR Upload Zone -->
+                            <div class="main-ocr-uploader glass-card mt-2 p-2" style="border: 2px dashed rgba(212,175,55,0.4); text-align: center; border-radius: 8px;">
+                                <label for="main-ocr-input" style="cursor: pointer; display: block; margin: 0;">
+                                    <i class="fa-solid fa-file-invoice gold-text" style="font-size: 1.5rem; margin-bottom: 5px;"></i>
+                                    <p style="font-size: 0.85rem; margin: 0; font-weight: 600; color: var(--gold-light);">Bulk OCR / Auto-Register Farmer</p>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Upload page to auto-add profile</span>
+                                </label>
+                                <input type="file" id="main-ocr-input" accept="image/*" class="hide" onchange="triggerMainOCRUpload(event)">
+                            </div>
+
+                            <!-- View Toggles -->
+                            <div class="view-toggles mt-2" style="display: flex; gap: 8px; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                                <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">View Mode:</span>
+                                <div class="toggle-buttons" style="display: flex; gap: 4px;">
+                                    <button class="gold-btn-outline btn-sm active" onclick="setFarmerViewMode('grid')" id="btn-view-grid" title="Grid View" style="padding: 4px 8px; font-size: 0.75rem;"><i class="fa-solid fa-table-cells-large"></i> Grid</button>
+                                    <button class="gold-btn-outline btn-sm" onclick="setFarmerViewMode('tile')" id="btn-view-tile" title="Tile View" style="padding: 4px 8px; font-size: 0.75rem;"><i class="fa-solid fa-table-cells"></i> Tile</button>
+                                    <button class="gold-btn-outline btn-sm" onclick="setFarmerViewMode('list')" id="btn-view-list" title="List View" style="padding: 4px 8px; font-size: 0.75rem;"><i class="fa-solid fa-list"></i> List</button>
+                                </div>
+                            </div>
+                            
+                            <div class="farmers-list-wrapper mt-2">
                                 <ul id="farmers-list" class="farmers-list-group">
                                     <!-- Dynamic list items of farmers -->
                                 </ul>
                             </div>
                         </div>
 
-                        <!-- Right Column: Farmer Full Details & Notebook Gallery -->
+                        <!-- Right Column: Farmer Details / Inline Form -->
                         <div class="split-right glass-card" id="farmer-detail-view">
+                            <!-- Placeholder -->
                             <div id="detail-placeholder" style="width: 100%;">
                                 <div class="detail-placeholder-message">
                                     <i class="fa-solid fa-users-viewfinder"></i>
@@ -278,11 +311,12 @@
                                     <div class="profile-info-block">
                                         <h2 id="detail-farmer-name">Farmer Name</h2>
                                         <p id="detail-farmer-location"><i class="fa-solid fa-location-dot"></i> Village Name</p>
-                                        <div class="profile-actions-inline">
-                                            <button class="gold-btn-outline" id="detail-back-btn" onclick="clearFarmerSelection()"><i class="fa-solid fa-arrow-left"></i> Back to List</button>
-                                            <button class="gold-btn-outline" id="detail-edit-btn"><i class="fa-solid fa-edit"></i> Edit Info</button>
-                                            <button class="gold-btn" id="detail-ledger-btn"><i class="fa-solid fa-file-invoice-dollar"></i> View Ledger</button>
-                                            <button class="gold-btn-danger" id="detail-delete-btn"><i class="fa-solid fa-trash"></i> Delete Farmer</button>
+                                        <div class="profile-actions-inline" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                                            <button class="gold-btn-outline btn-sm" id="detail-back-btn" onclick="clearFarmerSelection()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                                            <button class="gold-btn-outline btn-sm" id="detail-edit-btn" onclick="openEditFarmerFormInline()"><i class="fa-solid fa-edit"></i> Edit</button>
+                                            <button class="gold-btn-outline btn-sm" id="detail-interest-btn" onclick="openProfileInterestModal()"><i class="fa-solid fa-percent"></i> Interest</button>
+                                            <button class="gold-btn btn-sm" id="detail-ledger-btn"><i class="fa-solid fa-file-invoice-dollar"></i> Ledger</button>
+                                            <button class="gold-btn-danger btn-sm" id="detail-delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
                                         </div>
                                     </div>
                                 </div>
@@ -298,13 +332,33 @@
                                     </div>
                                 </div>
 
+                                <!-- Associated Items/Purchases Section -->
+                                <div class="farmer-purchases-section mt-3">
+                                    <h4 style="color: var(--gold-light); font-family: 'Cinzel', serif; font-size: 0.95rem; margin-bottom: 8px;"><i class="fa-solid fa-basket-shopping"></i> Associated Stock & Purchases</h4>
+                                    <div class="table-responsive" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+                                        <table class="data-table small" id="farmer-items-table" style="margin: 0; font-size: 0.8rem;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Stock Item</th>
+                                                    <th>Amount</th>
+                                                    <th>Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Dynamic rows populated from BILL transactions -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
                                 <hr class="gold-hr">
 
                                 <!-- HANDWRITTEN NOTEBOOKS SECTION -->
                                 <div class="notebook-section">
                                     <div class="section-title-flex">
                                         <h3><i class="fa-solid fa-book-open"></i> Paper Notebook Digitizer</h3>
-                                        <button class="gold-btn-outline" onclick="toggleModal('notebook-upload-modal', true)"><i class="fa-solid fa-upload"></i> Upload Notebook Page</button>
+                                        <button class="gold-btn-outline btn-sm" onclick="toggleModal('notebook-upload-modal', true)"><i class="fa-solid fa-upload"></i> Upload Notebook Page</button>
                                     </div>
                                     <p class="section-subtitle">Upload pages of handwritten accounts notebooks. Click on any page to transcribe the data manually into the ledger.</p>
 
@@ -314,34 +368,34 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Farmer Form Modal -->
-                    <div id="farmer-modal" class="modal hide">
-                        <div class="modal-content">
-                            <span class="close-modal" onclick="toggleModal('farmer-modal', false)">&times;</span>
-                            <h3 id="farmer-modal-title"><i class="fa-solid fa-user-plus"></i> Add Farmer Profile</h3>
-                            <form id="farmer-form">
-                                <input type="hidden" id="farmer-id">
-                                <div class="form-group">
-                                    <label for="farmer-name">Farmer Name</label>
-                                    <input type="text" id="farmer-name" placeholder="Enter full name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="farmer-phone">Phone Number</label>
-                                    <input type="tel" id="farmer-phone" placeholder="Enter 10-digit number" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="farmer-village">Village Name</label>
-                                    <input type="text" id="farmer-village" placeholder="Enter village" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="farmer-crop">Crop Details</label>
-                                    <input type="text" id="farmer-crop" placeholder="e.g. Paddy - 5 Acres, Cotton" required>
-                                </div>
-                                <button type="submit" class="gold-btn btn-block mt-3">Save Profile</button>
-                            </form>
+                            <!-- Inline Add/Edit Form (hidden by default) -->
+                            <div class="farmer-detail-form-content hide" id="detail-form-content" style="padding: 10px;">
+                                <h3 id="inline-form-title" style="font-family: 'Cinzel', serif; color: var(--gold-light); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;"><i class="fa-solid fa-user-plus"></i> Add Farmer Profile</h3>
+                                <form id="inline-farmer-form" onsubmit="saveInlineFarmer(event)">
+                                    <input type="hidden" id="inline-farmer-id">
+                                    <div class="form-group mt-2">
+                                        <label for="inline-farmer-name">Farmer Name</label>
+                                        <input type="text" id="inline-farmer-name" placeholder="Enter full name" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-farmer-phone">Phone Number</label>
+                                        <input type="tel" id="inline-farmer-phone" placeholder="Enter 10-digit number" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-farmer-village">Village Name</label>
+                                        <input type="text" id="inline-farmer-village" placeholder="Enter village" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-farmer-crop">Crop Details</label>
+                                        <input type="text" id="inline-farmer-crop" placeholder="e.g. Paddy - 5 Acres, Cotton" required>
+                                    </div>
+                                    <div class="form-actions mt-4" style="display: flex; gap: 10px;">
+                                        <button type="submit" class="gold-btn" style="flex: 1;">Save Profile</button>
+                                        <button type="button" class="gold-btn-outline" onclick="cancelInlineForm()">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
 
@@ -702,7 +756,328 @@
                     </div>
                 </section>
 
+                <!-- 6. TRADERS DIRECTORY TAB -->
+                <section id="tab-traders" class="tab-panel">
+                    <div class="panel-header-flex">
+                        <h2 class="panel-title">Traders Directory & Invoice Digitizer</h2>
+                    </div>
+
+                    <div class="split-view-container mt-2">
+                        <!-- Left Column: Traders List & Search -->
+                        <div class="split-left glass-card">
+                            <div class="search-bar-container">
+                                <input type="text" id="trader-search-input" placeholder="🔍 Search trader by name/location..." oninput="filterTradersList()">
+                                <button class="gold-btn mt-2 btn-block" onclick="openAddTraderFormInline()"><i class="fa-solid fa-user-plus"></i> Add New Trader</button>
+                            </div>
+                            <div class="farmers-list-wrapper mt-3">
+                                <ul id="traders-list" class="farmers-list-group">
+                                    <!-- Dynamic list items of traders -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Trader Details / Form / Returns -->
+                        <div class="split-right glass-card" id="trader-detail-view">
+                            <div id="trader-detail-placeholder" style="width: 100%;">
+                                <div class="detail-placeholder-message">
+                                    <i class="fa-solid fa-handshake"></i>
+                                    <p>Select a trader from the left directory to view details, track purchases, or process stock returns.</p>
+                                </div>
+                            </div>
+
+                            <!-- Detailed view -->
+                            <div class="farmer-detail-content hide" id="trader-detail-main-content">
+                                <div class="detail-profile-header">
+                                    <div class="profile-avatar-large">
+                                        <i class="fa-solid fa-building-flag" style="font-size: 2.5rem; color: var(--gold);"></i>
+                                    </div>
+                                    <div class="profile-info-block">
+                                        <h2 id="detail-trader-name">Trader Name</h2>
+                                        <p id="detail-trader-location"><i class="fa-solid fa-location-dot"></i> City/Location</p>
+                                        <div class="profile-actions-inline" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                                            <button class="gold-btn-outline btn-sm" onclick="clearTraderSelection()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                                            <button class="gold-btn-outline btn-sm" onclick="openEditTraderFormInline()"><i class="fa-solid fa-edit"></i> Edit</button>
+                                            <button class="gold-btn btn-sm" onclick="openTraderLedgerTab(selectedTraderId)"><i class="fa-solid fa-file-invoice-dollar"></i> Ledger</button>
+                                            <button class="gold-btn-danger btn-sm" onclick="deleteTrader(selectedTraderId)"><i class="fa-solid fa-trash"></i> Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="profile-details-grid mt-3">
+                                    <div class="detail-box">
+                                        <strong>Phone Number:</strong>
+                                        <span id="detail-trader-phone">-</span>
+                                    </div>
+                                    <div class="detail-box">
+                                        <strong>Supplied Items / Company:</strong>
+                                        <span id="detail-trader-items">-</span>
+                                    </div>
+                                </div>
+
+                                <hr class="gold-hr">
+
+                                <!-- RETURNS PROCESSING LOG -->
+                                <div class="returns-section mt-3">
+                                    <div class="section-title-flex">
+                                        <h3><i class="fa-solid fa-truck-ramp-box"></i> Return Processing (Returned Stock)</h3>
+                                        <button class="gold-btn-outline btn-sm" onclick="toggleModal('return-modal', true)"><i class="fa-solid fa-plus"></i> Log Stock Return</button>
+                                    </div>
+                                    <p class="section-subtitle">Log return of damaged or unsold stock to this trader. This will automatically deduct the return value from the trader's balance.</p>
+                                    <div class="table-responsive mt-2" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+                                        <table class="data-table small" id="trader-returns-table" style="margin: 0; font-size: 0.8rem;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Returned Item</th>
+                                                    <th>Quantity</th>
+                                                    <th>Total Value (₹)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Dynamic return rows -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <hr class="gold-hr">
+
+                                <!-- TRADER INVOICE OCR SECTION -->
+                                <div class="notebook-section">
+                                    <div class="section-title-flex">
+                                        <h3><i class="fa-solid fa-file-invoice"></i> Purchase Invoice Digitizer</h3>
+                                        <button class="gold-btn-outline btn-sm" onclick="toggleModal('trader-invoice-modal', true)"><i class="fa-solid fa-upload"></i> Upload Invoice</button>
+                                    </div>
+                                    <p class="section-subtitle">Upload dealer purchase invoices. Click to run OCR scan and auto-populate the ledger transactions.</p>
+                                    <div class="notebook-gallery mt-2" id="trader-invoice-gallery">
+                                        <!-- Dynamic invoice thumbnails -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Inline Trader Add/Edit Form -->
+                            <div class="farmer-detail-form-content hide" id="trader-detail-form-content" style="padding: 10px;">
+                                <h3 id="trader-inline-form-title" style="font-family: 'Cinzel', serif; color: var(--gold-light); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;"><i class="fa-solid fa-user-plus"></i> Add Trader Profile</h3>
+                                <form id="inline-trader-form" onsubmit="saveInlineTrader(event)">
+                                    <input type="hidden" id="inline-trader-id">
+                                    <div class="form-group mt-2">
+                                        <label for="inline-trader-name">Trader / Supplier Name</label>
+                                        <input type="text" id="inline-trader-name" placeholder="Enter company / merchant name" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-trader-phone">Phone Number</label>
+                                        <input type="tel" id="inline-trader-phone" placeholder="Enter phone number" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-trader-village">City / Location</label>
+                                        <input type="text" id="inline-trader-village" placeholder="Enter city" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-trader-crop">Supplied Items / Brand</label>
+                                        <input type="text" id="inline-trader-crop" placeholder="e.g. Guntur Seeds, Coromandel Fertilizers" required>
+                                    </div>
+                                    <div class="form-actions mt-4" style="display: flex; gap: 10px;">
+                                        <button type="submit" class="gold-btn" style="flex: 1;">Save Profile</button>
+                                        <button type="button" class="gold-btn-outline" onclick="cancelTraderInlineForm()">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. TRADER LEDGER TAB -->
+                <section id="tab-traders-ledger" class="tab-panel">
+                    <h2 class="panel-title">Trader Ledger & Supplier Accounts</h2>
+                    <div class="ledger-header-control glass-card">
+                        <div class="form-group">
+                            <label for="trader-ledger-selector">Select Trader Account</label>
+                            <select id="trader-ledger-selector" class="gold-select" onchange="loadTraderLedger(this.value)">
+                                <option value="">-- Select Trader --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="trader-ledger-details-container" class="hide">
+                        <!-- Summary Cards -->
+                        <div class="ledger-summary-grid mt-3">
+                            <div class="summary-box">
+                                <h3>Total Purchases Owed</h3>
+                                <p id="trader-summary-bills">₹0.00</p>
+                            </div>
+                            <div class="summary-box">
+                                <h3>Total Payments Made</h3>
+                                <p id="trader-summary-payments">₹0.00</p>
+                            </div>
+                            <div class="summary-box balance-box">
+                                <h3>Total Outstanding Amount Owed</h3>
+                                <p id="trader-summary-balance">₹0.00</p>
+                            </div>
+                        </div>
+
+                        <!-- Actions & Entries -->
+                        <div class="panel-header-flex mt-4">
+                            <h3>Ledger Entries</h3>
+                            <button class="gold-btn" onclick="toggleModal('trader-tx-modal', true)"><i class="fa-solid fa-plus"></i> Add Entry</button>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="glass-card mt-2">
+                            <div class="table-responsive">
+                                <table class="data-table" id="trader-ledger-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Description</th>
+                                            <th>Type</th>
+                                            <th>Debit (Payments Made / Returns)</th>
+                                            <th>Credit (Purchases Owed)</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
             </main>
+
+            <!-- RETURN LOG MODAL -->
+            <div id="return-modal" class="modal hide">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="toggleModal('return-modal', false)">&times;</span>
+                    <h3><i class="fa-solid fa-truck-ramp-box"></i> Log Purchase Return</h3>
+                    <form id="return-form" onsubmit="saveReturnTransaction(event)">
+                        <div class="form-group mt-2">
+                            <label for="return-item">Item Name</label>
+                            <input type="text" id="return-item" placeholder="e.g. Urea fertilizer (damaged)" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="return-qty">Quantity</label>
+                            <input type="number" id="return-qty" min="1" placeholder="e.g. 5" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="return-amount">Total Return Credit Value (₹)</label>
+                            <input type="number" step="0.01" id="return-amount" placeholder="e.g. 7000" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="return-date">Return Date</label>
+                            <input type="date" id="return-date" required>
+                        </div>
+                        <button type="submit" class="gold-btn btn-block mt-3">Log Return</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TRADER INVOICE UPLOAD MODAL -->
+            <div id="trader-invoice-modal" class="modal hide">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="toggleModal('trader-invoice-modal', false)">&times;</span>
+                    <h3><i class="fa-solid fa-upload"></i> Upload Supplier Invoice</h3>
+                    <form id="trader-invoice-form" onsubmit="uploadTraderInvoice(event)">
+                        <div class="form-group mt-2">
+                            <label for="trader-invoice-notes">Invoice Notes / Reference</label>
+                            <input type="text" id="trader-invoice-notes" placeholder="e.g. Invoice #99011 - Paddy seeds wholesale" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label>Select Invoice Image</label>
+                            <div class="file-upload-wrapper">
+                                <label for="trader-invoice-file" class="gold-btn-outline btn-block">
+                                    <i class="fa-solid fa-file-arrow-up"></i> Choose Invoice Image
+                                </label>
+                                <input type="file" id="trader-invoice-file" accept="image/*" class="hide" required onchange="document.getElementById('trader-invoice-filename').innerText = this.files[0].name">
+                                <span id="trader-invoice-filename" class="d-block mt-1" style="font-size:0.8rem; color:var(--gold-light);"></span>
+                            </div>
+                        </div>
+                        <button type="submit" class="gold-btn btn-block mt-3">Upload Invoice</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- PROFILE INTEREST MODAL -->
+            <div id="profile-interest-modal" class="modal hide">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="toggleModal('profile-interest-modal', false)">&times;</span>
+                    <h3><i class="fa-solid fa-percent"></i> Calculate Account Interest</h3>
+                    <form id="profile-interest-form" onsubmit="runProfileInterestCalc(event)">
+                        <div class="form-group mt-2">
+                            <label for="prof-calc-principal">Principal Amount (₹)</label>
+                            <input type="number" step="0.01" id="prof-calc-principal" required placeholder="Principal amount">
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="prof-calc-rate">Monthly Rate (%)</label>
+                            <input type="number" step="0.01" id="prof-calc-rate" value="2.0" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label>Interest Type</label>
+                            <div style="display: flex; gap: 20px; margin-top: 5px;">
+                                <label><input type="radio" name="prof-interest-type" value="SIMPLE" checked> Simple Interest</label>
+                                <label><input type="radio" name="prof-interest-type" value="COMPOUND"> Compound Monthly</label>
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="prof-calc-start">Start Date (Date of Advance)</label>
+                            <input type="date" id="prof-calc-start" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="prof-calc-end">End Date (Settlement Date)</label>
+                            <input type="date" id="prof-calc-end" required>
+                        </div>
+                        
+                        <button type="submit" class="gold-btn btn-block mt-3">Calculate Interest</button>
+                    </form>
+                    
+                    <div class="calc-results-content hide mt-3 p-3 glass-card" id="profile-interest-results">
+                        <div class="result-row highlight" style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span>Accrued Interest:</span>
+                            <strong id="prof-res-interest" class="gold-text">₹0.00</strong>
+                        </div>
+                        <div class="result-row highlight" style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span>Total (P + I):</span>
+                            <span id="prof-res-total">₹0.00</span>
+                        </div>
+                        <div class="result-row" style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span>Duration:</span>
+                            <span id="prof-res-duration">0 Months</span>
+                        </div>
+                        <button class="gold-btn btn-block mt-2" onclick="postProfileInterestToLedger()"><i class="fa-solid fa-file-circle-plus"></i> Post Interest to Ledger</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRADER TRANSACTION MODAL -->
+            <div id="trader-tx-modal" class="modal hide">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="toggleModal('trader-tx-modal', false)">&times;</span>
+                    <h3><i class="fa-solid fa-plus-circle"></i> Log Trader Transaction</h3>
+                    <form id="trader-tx-form" onsubmit="saveTraderTransaction(event)">
+                        <div class="form-group mt-2">
+                            <label for="trader-tx-type">Transaction Type</label>
+                            <select id="trader-tx-type" class="gold-select" required>
+                                <option value="BILL">BILL (Purchase of goods/stock from trader)</option>
+                                <option value="PAYMENT">PAYMENT (Payment made to trader)</option>
+                            </select>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="trader-tx-amount">Amount (₹)</label>
+                            <input type="number" step="0.01" min="0.01" id="trader-tx-amount" placeholder="e.g. 50000" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="trader-tx-date">Date</label>
+                            <input type="date" id="trader-tx-date" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="trader-tx-desc">Description / Remarks</label>
+                            <input type="text" id="trader-tx-desc" placeholder="e.g. Bank payment, invoice settlement" required>
+                        </div>
+                        <button type="submit" class="gold-btn btn-block mt-3">Submit Transaction</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
