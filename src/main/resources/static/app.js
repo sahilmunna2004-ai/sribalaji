@@ -1649,6 +1649,7 @@ function renderFarmersPlaceholderGrid(filterQuery = '') {
         return;
     }
 
+    const modeClass = farmerViewMode === 'tile' ? 'tile-mode' : farmerViewMode === 'list' ? 'list-mode' : '';
     let cardsHTML = '';
     filtered.forEach(farmer => {
         const avatarSrc = farmer.photoPath 
@@ -1678,7 +1679,7 @@ function renderFarmersPlaceholderGrid(filterQuery = '') {
             <h3><i class="fa-solid fa-users"></i> Registered ${isTraders ? 'Traders' : 'Farmers'} List</h3>
             <p>Select a ${isTraders ? 'trader' : 'farmer'} from the list below or use the sidebar directory to view details.</p>
         </div>
-        <div class="farmer-placeholder-grid">
+        <div class="farmer-placeholder-grid ${modeClass}">
             ${cardsHTML}
         </div>
     `;
@@ -1691,7 +1692,7 @@ function clearFarmerSelection() {
     document.getElementById('detail-main-content').classList.add('hide');
     document.getElementById('detail-form-content').classList.add('hide');
     document.querySelectorAll('.farmer-list-item').forEach(item => item.classList.remove('selected'));
-    renderFarmersPlaceholderGrid('');
+    renderFarmersPlaceholderGrid(document.getElementById('farmer-search-input').value);
 }
 
 // Global view mode for Farmers List
@@ -2026,6 +2027,7 @@ async function postProfileInterestToLedger() {
 // ============================================================================
 let activeTraders = [];
 let selectedTraderId = null;
+let traderViewMode = 'grid';
 
 async function loadTradersDirectory() {
     try {
@@ -2034,6 +2036,7 @@ async function loadTradersDirectory() {
             activeTraders = await res.json();
             renderTradersList('');
             clearTraderSelection();
+            renderTradersPlaceholderGrid(document.getElementById('trader-search-input')?.value || '');
         }
     } catch (err) {
         console.error("Error loading traders", err);
@@ -2076,6 +2079,7 @@ function renderTradersList(query = '') {
 function filterTradersList() {
     const query = document.getElementById('trader-search-input').value;
     renderTradersList(query);
+    renderTradersPlaceholderGrid(query);
 }
 
 async function selectTraderInView(id) {
@@ -2108,6 +2112,7 @@ function clearTraderSelection() {
     document.getElementById('trader-detail-main-content').classList.add('hide');
     document.getElementById('trader-detail-form-content').classList.add('hide');
     document.querySelectorAll('#traders-list .farmer-list-item').forEach(item => item.classList.remove('selected'));
+    renderTradersPlaceholderGrid(document.getElementById('trader-search-input')?.value || '');
 }
 
 // Inline Trader Form handlers
@@ -2123,6 +2128,62 @@ function openAddTraderFormInline() {
     document.getElementById('inline-trader-phone').value = '';
     document.getElementById('inline-trader-village').value = '';
     document.getElementById('inline-trader-crop').value = '';
+}
+
+function setTraderViewMode(mode) {
+    traderViewMode = mode;
+    document.getElementById('btn-trader-view-grid').classList.toggle('active', mode === 'grid');
+    document.getElementById('btn-trader-view-tile').classList.toggle('active', mode === 'tile');
+    document.getElementById('btn-trader-view-list').classList.toggle('active', mode === 'list');
+    renderTradersPlaceholderGrid(document.getElementById('trader-search-input')?.value || '');
+}
+
+function renderTradersPlaceholderGrid(filterQuery = '') {
+    const placeholder = document.getElementById('trader-detail-placeholder');
+    if (!placeholder) return;
+
+    const query = filterQuery.toLowerCase();
+    const filtered = activeTraders.filter(t => 
+        t.name.toLowerCase().includes(query) || 
+        t.village.toLowerCase().includes(query)
+    );
+
+    if (filtered.length === 0) {
+        placeholder.innerHTML = `
+            <div class="detail-placeholder-message">
+                <i class="fa-solid fa-users-viewfinder"></i>
+                <p>No traders match your search query.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const modeClass = traderViewMode === 'tile' ? 'tile-mode' : traderViewMode === 'list' ? 'list-mode' : '';
+    let cardsHTML = '';
+    filtered.forEach(trader => {
+        cardsHTML += `
+            <div class="farmer-grid-card" onclick="selectTraderInView(${trader.id})">
+                <div class="farmer-grid-avatar"><i class="fa-solid fa-building-flag" style="font-size: 1.5rem; color:var(--gold);"></i></div>
+                <h3>${trader.name}</h3>
+                <p class="farmer-grid-meta"><i class="fa-solid fa-location-dot"></i> ${trader.village}</p>
+                <p class="farmer-grid-meta"><i class="fa-solid fa-phone"></i> ${trader.phone}</p>
+                <span class="crop-badge">Items: ${trader.cropDetails}</span>
+                <div class="farmer-grid-actions">
+                    <button class="gold-btn btn-sm">View Details</button>
+                </div>
+            </div>
+        `;
+    });
+
+    placeholder.innerHTML = `
+        <div class="placeholder-grid-header">
+            <h3><i class="fa-solid fa-users"></i> Registered Traders List</h3>
+            <p>Select a trader from the list below or use the sidebar directory to view details.</p>
+        </div>
+        <div class="farmer-placeholder-grid ${modeClass}">
+            ${cardsHTML}
+        </div>
+    `;
 }
 
 function openEditTraderFormInline() {
@@ -2149,6 +2210,7 @@ function cancelTraderInlineForm() {
         document.getElementById('trader-detail-main-content').classList.remove('hide');
     } else {
         document.getElementById('trader-detail-placeholder').classList.remove('hide');
+        renderTradersPlaceholderGrid(document.getElementById('trader-search-input')?.value || '');
     }
 }
 

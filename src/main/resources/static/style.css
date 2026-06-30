@@ -295,6 +295,13 @@ input:focus, select:focus {
     letter-spacing: 0.5px;
 }
 
+.brand-titles p.property-owner {
+    font-size: 0.9rem;
+    color: var(--gold-light);
+    margin-top: 4px;
+    opacity: 0.9;
+}
+
 .shop-dropdown-container {
     display: flex;
     align-items: center;
