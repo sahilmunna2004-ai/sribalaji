@@ -251,25 +251,24 @@ function updateShopLabels() {
         lbl.innerText = isTraders ? 'Sri Balaji Traders' : 'Sri Balaji Enterprises';
     });
 
-    // 2. Sidebar Navigation Items
+    // 2. Sidebar Navigation Items (Always visible for multi-directory access)
     const navStock = document.getElementById('nav-stock');
     const navFarmers = document.getElementById('nav-farmers');
     const navFarmersText = document.getElementById('nav-farmers-text');
     const navLedger = document.getElementById('nav-ledger');
     const navLedgerText = document.getElementById('nav-ledger-text');
     const navCalculator = document.getElementById('nav-calculator');
+    const navTraders = document.getElementById('nav-traders');
+    const navTradersLedger = document.getElementById('nav-traders-ledger');
 
-    if (isTraders) {
-        if (navStock) navStock.style.display = 'block';
-        if (navFarmersText) navFarmersText.innerText = 'Traders Directory';
-        if (navLedgerText) navLedgerText.innerText = 'Trader Ledger';
-        if (navCalculator) navCalculator.style.display = 'none';
-    } else {
-        if (navStock) navStock.style.display = 'none';
-        if (navFarmersText) navFarmersText.innerText = 'Farmers Directory';
-        if (navLedgerText) navLedgerText.innerText = 'Farmer Ledger';
-        if (navCalculator) navCalculator.style.display = 'block';
-    }
+    if (navStock) navStock.style.display = 'block';
+    if (navFarmers) navFarmers.style.display = 'block';
+    if (navFarmersText) navFarmersText.innerText = 'Farmers Directory';
+    if (navLedger) navLedger.style.display = 'block';
+    if (navLedgerText) navLedgerText.innerText = 'Farmer Ledger';
+    if (navCalculator) navCalculator.style.display = 'block';
+    if (navTraders) navTraders.style.display = 'block';
+    if (navTradersLedger) navTradersLedger.style.display = 'block';
 
     // 3. Panel Titles & Form Headers
     // Tab Directory Title
