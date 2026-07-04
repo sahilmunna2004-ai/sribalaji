@@ -2,8 +2,8 @@ package com.balaji.traders.controller;
 
 import com.balaji.traders.model.Farmer;
 import com.balaji.traders.model.NotebookPage;
-import com.balaji.traders.repository.FarmerRepository;
-import com.balaji.traders.repository.NotebookPageRepository;
+import com.balaji.traders.repository.file.FarmerFileRepository;
+import com.balaji.traders.repository.file.NotebookPageFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -27,10 +27,10 @@ import java.util.Optional;
 public class FarmerController {
 
     @Autowired
-    private FarmerRepository farmerRepository;
+    private FarmerFileRepository farmerRepository;
 
     @Autowired
-    private NotebookPageRepository notebookPageRepository;
+    private NotebookPageFileRepository notebookPageRepository;
 
     @Value("${app.upload.dir:./data/photos}")
     private String uploadDir;
@@ -174,7 +174,8 @@ public class FarmerController {
     public ResponseEntity<NotebookPage> uploadNotebookPage(
             @PathVariable Long id,
             @RequestParam("photo") MultipartFile file,
-            @RequestParam(value = "notes", required = false) String notes) {
+            @RequestParam(value = "notes", required = false) String notes,
+            @RequestParam(value = "year", required = false) String year) {
         
         if (!farmerRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
@@ -201,6 +202,7 @@ public class FarmerController {
             page.setImagePath(filePath.toString());
             page.setUploadDate(LocalDate.now());
             page.setNotes(notes != null ? notes : "");
+            page.setYear(year != null ? year : "");
             
             NotebookPage savedPage = notebookPageRepository.save(page);
             return ResponseEntity.ok(savedPage);

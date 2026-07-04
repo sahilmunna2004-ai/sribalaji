@@ -1,8 +1,27 @@
+console.log('Sri Balaji app.js loaded');
+
 // PWA Cache Buster: Unregister stale service worker and force reload if updated elements are missing
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', verifyPwaVersion);
+    document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
     verifyPwaVersion();
+    initializeApp();
+}
+
+window.addEventListener('load', () => {
+    if (!window.appInitialized) {
+        initializeApp();
+    }
+});
+
+function initializeApp() {
+    if (window.appInitialized) return;
+    window.appInitialized = true;
+    console.log('Sri Balaji app initialization started');
+    setupAuthView();
+    setupEventListeners();
+    registerServiceWorker();
 }
 
 function verifyPwaVersion() {
@@ -27,6 +46,7 @@ const API_BASE = '/api';
 // Global Application State
 let sessionToken = localStorage.getItem('balaji_token') || null;
 let currentShopType = 'TRADERS'; // default: Sri Balaji Traders
+let selectedSeason = '';
 let activeFarmers = [];
 let selectedFarmerId = null;
 let selectedNotebookPages = [];
@@ -48,13 +68,6 @@ const logoutBtn = document.getElementById('logout-btn');
 const profileBtn = document.getElementById('profile-btn');
 const profileModal = document.getElementById('profile-modal');
 const closeModals = document.querySelectorAll('.close-modal');
-
-// Initialize App
-document.addEventListener('DOMContentLoaded', () => {
-    setupAuthView();
-    setupEventListeners();
-    registerServiceWorker();
-});
 
 // Register Service Worker for PWA mobile installability
 function registerServiceWorker() {
@@ -79,40 +92,65 @@ function setupAuthView() {
 
 // Global Event Listeners
 function setupEventListeners() {
-    // Login Submission
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const usernameInput = document.getElementById('username').value;
-        const passwordInput = document.getElementById('password').value;
-        loginError.classList.add('hide');
+    if (!loginForm) {
+        console.error('Login form not found, event listener cannot be attached');
+    } else {
+        console.log('Attaching login form submit handler');
+        // Login Submission - prevent default form submit, send JSON instead
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const usernameInput = document.getElementById('username').value.trim();
+            const passwordInput = document.getElementById('password').value.trim();
+            
+            if (!usernameInput || !passwordInput) {
+                loginError.innerText = "Username and password are required.";
+                loginError.classList.remove('hide');
+                return;
+            }
+            
+            loginError.classList.add('hide');
 
-        try {
-            const response = await fetch(`${API_BASE}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: usernameInput, password: passwordInput })
-            });
+            try {
+                console.log('Sending login request to /api/auth/login');
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameInput, password: passwordInput })
+                });
 
-            if (response.ok) {
-                const data = await response.json();
-                sessionToken = data.token;
-                localStorage.setItem('balaji_token', sessionToken);
-                setupAuthView();
-            } else {
+                console.log('Login response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Login successful:', data);
+                    sessionToken = data.token;
+                    localStorage.setItem('balaji_token', sessionToken);
+                    setupAuthView();
+                } else {
+                    const errorData = await response.json().catch(() => null);
+                    console.log('Login failed:', errorData);
+                    loginError.innerText = errorData?.message || "Invalid username or password.";
+                    loginError.classList.remove('hide');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                loginError.innerText = "Error connecting to server. Make sure backend is running.";
                 loginError.classList.remove('hide');
             }
-        } catch (err) {
-            loginError.innerText = "Error connecting to server. Make sure backend is running.";
-            loginError.classList.remove('hide');
+        });
         }
-    });
 
-    // Logout
-    logoutBtn.addEventListener('click', () => {
-        sessionToken = null;
-        localStorage.removeItem('balaji_token');
-        setupAuthView();
-    });
+        // Ensure logout/profile listeners are attached using current DOM
+        const logoutEl = document.getElementById('logout-btn');
+        logoutEl?.addEventListener('click', () => {
+            sessionToken = null;
+            localStorage.removeItem('balaji_token');
+            setupAuthView();
+        });
+
+        document.getElementById('profile-btn')?.addEventListener('click', () => {
+            document.getElementById('profile-modal')?.classList.remove('hide');
+        });
 
     // Shop Selector Dropdown Switch
     shopSelector.addEventListener('change', (e) => {
@@ -145,8 +183,8 @@ function setupEventListeners() {
     });
 
     // Profile Modal toggle
-    profileBtn.addEventListener('click', () => {
-        profileModal.classList.remove('hide');
+    profileBtn?.addEventListener('click', () => {
+        profileModal?.classList.remove('hide');
     });
 
     // Modal clicks (close if clicked outside content)
@@ -157,13 +195,13 @@ function setupEventListeners() {
     });
 
     // Stock Form Submit
-    document.getElementById('stock-form').addEventListener('submit', logStockPurchase);
+        document.getElementById('stock-form')?.addEventListener('submit', logStockPurchase);
 
     // Farmer Form Submit
-    document.getElementById('farmer-form').addEventListener('submit', saveFarmerProfile);
+        document.getElementById('farmer-form')?.addEventListener('submit', saveFarmerProfile);
 
     // Ledger Farmer Selector change
-    document.getElementById('ledger-farmer-selector').addEventListener('change', (e) => {
+    document.getElementById('ledger-farmer-selector')?.addEventListener('change', (e) => {
         const farmerId = e.target.value;
         if (farmerId) {
             loadFarmerLedger(farmerId);
@@ -173,17 +211,23 @@ function setupEventListeners() {
     });
 
     // Ledger Transaction Form Submit
-    document.getElementById('transaction-form').addEventListener('submit', saveLedgerTransaction);
+        document.getElementById('transaction-form')?.addEventListener('submit', saveLedgerTransaction);
 
     // Search Farmers list dynamically
-    document.getElementById('farmer-search-input').addEventListener('input', (e) => {
+        document.getElementById('farmer-search-input')?.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase();
         renderFarmersList(query);
         renderFarmersPlaceholderGrid(query);
     });
 
+    document.getElementById('season-filter')?.addEventListener('change', (e) => {
+        selectedSeason = e.target.value;
+        renderFarmersList(document.getElementById('farmer-search-input').value.toLowerCase());
+        renderFarmersPlaceholderGrid(document.getElementById('farmer-search-input').value.toLowerCase());
+    });
+
     // Standalone Calculator Farmer Selector change (Auto fills principal)
-    document.getElementById('calc-farmer-select').addEventListener('change', async (e) => {
+        document.getElementById('calc-farmer-select')?.addEventListener('change', async (e) => {
         const farmerId = e.target.value;
         if (farmerId) {
             try {
@@ -199,31 +243,31 @@ function setupEventListeners() {
     });
 
     // Standalone Calculator Form Submit
-    document.getElementById('calc-form').addEventListener('submit', calculateInterestAccrued);
+        document.getElementById('calc-form')?.addEventListener('submit', calculateInterestAccrued);
 
     // Apply Standalone Interest to Ledger button
-    document.getElementById('post-interest-btn').addEventListener('click', applyInterestToLedger);
+        document.getElementById('post-interest-btn')?.addEventListener('click', applyInterestToLedger);
 
     // Profile Picture selected file name change
-    document.getElementById('profile-photo-input').addEventListener('change', (e) => {
+        document.getElementById('profile-photo-input')?.addEventListener('change', (e) => {
         const fileName = e.target.files[0] ? e.target.files[0].name : '';
         document.getElementById('profile-photo-selected-filename').innerText = fileName;
     });
 
     // Profile Photo Upload Form
-    document.getElementById('profile-photo-upload-form').addEventListener('submit', uploadFarmerProfilePhoto);
+        document.getElementById('profile-photo-upload-form')?.addEventListener('submit', uploadFarmerProfilePhoto);
 
     // Delete Profile Photo button
-    document.getElementById('profile-delete-photo-btn').addEventListener('click', deleteFarmerProfilePhoto);
+        document.getElementById('profile-delete-photo-btn')?.addEventListener('click', deleteFarmerProfilePhoto);
 
     // Notebook Page selected file name change
-    document.getElementById('notebook-file-input').addEventListener('change', (e) => {
+        document.getElementById('notebook-file-input')?.addEventListener('change', (e) => {
         const fileName = e.target.files[0] ? e.target.files[0].name : '';
         document.getElementById('notebook-selected-filename').innerText = fileName;
     });
 
     // Notebook upload form submit
-    document.getElementById('notebook-upload-form').addEventListener('submit', uploadNotebookPagePhoto);
+        document.getElementById('notebook-upload-form')?.addEventListener('submit', uploadNotebookPagePhoto);
 
     // Zoom listener for transcription page image
     const transImg = document.getElementById('transcription-image');
@@ -373,19 +417,6 @@ function updateShopLabels() {
     const detailCropLabel = document.getElementById('detail-crop-label');
     if (detailCropLabel) {
         detailCropLabel.innerText = isTraders ? "Items Supplied:" : "Crop details:";
-    }
-
-    const welcomeTitle = document.getElementById('welcome-title');
-    const welcomeDescription = document.getElementById('welcome-description');
-    if (welcomeTitle) {
-        welcomeTitle.innerText = isTraders
-            ? "శ్రీ బాలాజీ ట్రేడర్స్ నిర్వహణ ప్యానెల్ కు స్వాగతం"
-            : "శ్రీ బాలాజీ ఎంటర్‌ప్రైజెస్ నిర్వహణ ప్యానెల్ కు స్వాగతం";
-    }
-    if (welcomeDescription) {
-        welcomeDescription.innerText = isTraders
-            ? "రైతుల వద్ద నుండి పత్తి, మిర్చి మొదలగు అన్ని రకాల పంట దిగుబడులు కొనుగోలు చేయబడును."
-            : "మా వద్ద అన్ని రకాల నాణ్యమైన విత్తనాలు (Seeds) మరియు ఎరువులు (Fertilizers) లభించును.";
     }
 
     // 4. Ledger Titles & Labels
@@ -602,14 +633,15 @@ async function loadFarmersDirectory() {
                 await checkAndSeedSampleTransactions(activeFarmers);
             }
 
+            const hasSelectedFarmer = selectedFarmerId && activeFarmers.some(f => f.id === selectedFarmerId);
             renderFarmersList('');
-            
-            // Re-select previously active farmer if they still exist
-            if (selectedFarmerId) {
+            if (hasSelectedFarmer) {
                 selectFarmerInView(selectedFarmerId);
             } else {
+                selectedFarmerId = null;
                 document.getElementById('detail-placeholder').classList.remove('hide');
                 document.getElementById('detail-main-content').classList.add('hide');
+                document.getElementById('detail-form-content').classList.add('hide');
                 renderFarmersPlaceholderGrid('');
             }
         }
@@ -651,6 +683,7 @@ async function seedSampleFarmersData() {
                 const formData = new FormData();
                 formData.append("photo", imgBlob, fileName);
                 formData.append("notes", isTraders ? savedFarmer.name + " Purchase Invoice Page 1" : savedFarmer.name + " Notebook Page 1");
+                formData.append("season", "2025-26");
 
                 await fetch(`${API_BASE}/farmers/${savedFarmer.id}/notebooks`, {
                     method: 'POST',
@@ -674,10 +707,11 @@ function renderFarmersList(filterQuery = '') {
     const listEl = document.getElementById('farmers-list');
     listEl.innerHTML = '';
 
-    const filtered = activeFarmers.filter(f => 
-        f.name.toLowerCase().includes(filterQuery) || 
-        f.village.toLowerCase().includes(filterQuery)
-    );
+    const filtered = activeFarmers.filter(f => {
+        const matchesText = f.name.toLowerCase().includes(filterQuery) || f.village.toLowerCase().includes(filterQuery);
+        const matchesSeason = !selectedSeason || (f.season && f.season === selectedSeason);
+        return matchesText && matchesSeason;
+    });
 
     if (filtered.length === 0) {
         listEl.innerHTML = `<li class="text-center p-3" style="color: var(--text-muted);">No farmers match query.</li>`;
@@ -702,14 +736,23 @@ function renderFarmersList(filterQuery = '') {
             <div class="farmer-list-item-info">
                 <h4>${farmer.name}</h4>
                 <p><i class="fa-solid fa-location-dot"></i> ${farmer.village}</p>
+                <p style="font-size:0.85rem; color: var(--text-muted);">Season: ${farmer.season || 'N/A'}</p>
+            </div>
+            <div class="farmer-list-item-actions">
+                <button class="gold-btn-outline btn-sm" type="button">Select</button>
+                <button class="gold-btn-danger btn-sm" type="button">Delete</button>
             </div>
         `;
 
-        li.addEventListener('click', () => {
-            // Remove selection styling from previous items
+        const buttons = li.querySelectorAll('button');
+        buttons[0].addEventListener('click', () => {
             document.querySelectorAll('.farmer-list-item').forEach(item => item.classList.remove('selected'));
             li.classList.add('selected');
             selectFarmerInView(farmer.id);
+        });
+        buttons[1].addEventListener('click', async (event) => {
+            event.stopPropagation();
+            openDeleteFarmerModal(farmer.id, farmer.name);
         });
 
         listEl.appendChild(li);
@@ -733,6 +776,7 @@ async function selectFarmerInView(id) {
     document.getElementById('detail-farmer-location').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${farmer.village}`;
     document.getElementById('detail-farmer-phone').innerText = farmer.phone;
     document.getElementById('detail-farmer-crop').innerText = farmer.cropDetails;
+    document.getElementById('detail-farmer-season').innerText = farmer.season || 'N/A';
 
     // Profile photo handling
     const avatarBox = document.getElementById('detail-profile-avatar');
@@ -752,17 +796,8 @@ async function selectFarmerInView(id) {
         openFarmerLedgerTab(farmer.id);
     };
 
-    document.getElementById('detail-delete-btn').onclick = async () => {
-        if (!confirm(`Are you sure you want to delete profile for ${farmer.name}? All photos and ledger history will be permanently wiped.`)) return;
-        try {
-            const res = await fetch(`${API_BASE}/farmers/${farmer.id}`, { method: 'DELETE' });
-            if (res.ok) {
-                selectedFarmerId = null;
-                loadFarmersDirectory();
-            }
-        } catch (err) {
-            console.error("Error deleting farmer", err);
-        }
+    document.getElementById('detail-delete-btn').onclick = () => {
+        openDeleteFarmerModal(farmer.id, farmer.name, farmer.village);
     };
 
     // Load associated stock/purchases
@@ -785,6 +820,7 @@ async function saveFarmerProfile(e) {
         phone: document.getElementById('farmer-phone').value,
         village: document.getElementById('farmer-village').value,
         cropDetails: document.getElementById('farmer-crop').value,
+        season: document.getElementById('farmer-season') ? document.getElementById('farmer-season').value : '',
         shopType: currentShopType
     };
 
@@ -923,15 +959,40 @@ async function loadNotebookGallery(farmerId) {
                 const imgUrl = `${API_BASE}/farmers/notebooks/${page.id}/image?t=${new Date().getTime()}`;
                 
                 const card = document.createElement('div');
-                card.className = 'notebook-thumbnail';
-                card.innerHTML = `
-                    <button class="notebook-thumbnail-delete-btn" onclick="deleteNotebookPage(${page.id}, event)"><i class="fa-solid fa-trash-can"></i></button>
-                    <div class="notebook-thumbnail-img-box" onclick="openTranscriptionWorkspace(${page.id}, '${imgUrl}', '${page.notes}')">
-                        <img src="${imgUrl}" alt="Notebook page">
-                    </div>
-                    <div class="notebook-thumbnail-notes" title="${page.notes}">${page.notes || 'Ledger Sheet'}</div>
-                `;
-                grid.appendChild(card);
+            card.className = 'notebook-thumbnail';
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'notebook-thumbnail-delete-btn';
+            deleteButton.type = 'button';
+            deleteButton.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+            deleteButton.addEventListener('click', (event) => deleteNotebookPage(page.id, event));
+
+            const imageBox = document.createElement('div');
+            imageBox.className = 'notebook-thumbnail-img-box';
+            imageBox.addEventListener('click', () => openTranscriptionWorkspace(page.id, imgUrl, page.notes));
+            const imgEl = document.createElement('img');
+            imgEl.src = imgUrl;
+            imgEl.alt = 'Notebook page';
+            imageBox.appendChild(imgEl);
+
+            const noteLine = document.createElement('div');
+            noteLine.className = 'notebook-thumbnail-notes';
+            noteLine.title = page.notes || 'Ledger Sheet';
+            noteLine.innerText = page.notes || 'Ledger Sheet';
+
+            const yearBadge = document.createElement('span');
+            yearBadge.className = 'notebook-year-badge';
+            yearBadge.innerText = page.year ? `Year: ${page.year}` : 'Year: N/A';
+
+            const footer = document.createElement('div');
+            footer.className = 'notebook-thumbnail-footer';
+            footer.appendChild(noteLine);
+            footer.appendChild(yearBadge);
+
+            card.appendChild(deleteButton);
+            card.appendChild(imageBox);
+            card.appendChild(footer);
+            grid.appendChild(card);
             });
         }
     } catch (err) {
@@ -941,11 +1002,20 @@ async function loadNotebookGallery(farmerId) {
 
 async function uploadNotebookPagePhoto(e) {
     e.preventDefault();
-    if (!selectedFarmerId) return;
+    if (!selectedFarmerId) {
+        alert('Please select a farmer from the directory before uploading a notebook page.');
+        return;
+    }
 
     const fileInput = document.getElementById('notebook-file-input');
     const file = fileInput.files[0];
     const notesValue = document.getElementById('notebook-notes').value;
+    const yearValue = document.getElementById('notebook-year').value;
+
+    if (!yearValue) {
+        alert("Please select the notebook year first.");
+        return;
+    }
 
     if (!file) {
         alert("Please select or snap a photo of the notebook page.");
@@ -979,6 +1049,7 @@ async function uploadNotebookPagePhoto(e) {
                 const formData = new FormData();
                 formData.append('photo', blob, 'notebook_sheet.jpg');
                 formData.append('notes', notesValue);
+                formData.append('year', yearValue);
 
                 try {
                     const res = await fetch(`${API_BASE}/farmers/${selectedFarmerId}/notebooks`, {
@@ -1660,10 +1731,11 @@ function renderFarmersPlaceholderGrid(filterQuery = '') {
 
     const isTraders = currentShopType === 'TRADERS';
     const query = filterQuery.toLowerCase();
-    const filtered = activeFarmers.filter(f => 
-        f.name.toLowerCase().includes(query) || 
-        f.village.toLowerCase().includes(query)
-    );
+    const filtered = activeFarmers.filter(f => {
+        const matchesQuery = f.name.toLowerCase().includes(query) || f.village.toLowerCase().includes(query);
+        const matchesSeason = !selectedSeason || selectedSeason === 'ALL' || f.season === selectedSeason;
+        return matchesQuery && matchesSeason;
+    });
 
     if (filtered.length === 0) {
         placeholder.innerHTML = `
@@ -1687,14 +1759,22 @@ function renderFarmersPlaceholderGrid(filterQuery = '') {
             : `<i class="fa-solid fa-user-circle"></i>`;
 
         cardsHTML += `
-            <div class="farmer-grid-card" onclick="selectFarmerInView(${farmer.id})">
-                <div class="farmer-grid-avatar">${avatarHTML}</div>
-                <h3>${farmer.name}</h3>
-                <p class="farmer-grid-meta"><i class="fa-solid fa-location-dot"></i> ${farmer.village}</p>
-                <p class="farmer-grid-meta"><i class="fa-solid fa-phone"></i> ${farmer.phone}</p>
-                <span class="crop-badge">${isTraders ? 'Items: ' : 'Crops: '}${farmer.cropDetails}</span>
+            <div class="farmer-grid-card ${farmerViewMode === 'list' ? 'farmer-grid-card-list' : ''}">
+                <div class="farmer-grid-card-inner" onclick="selectFarmerInView(${farmer.id})">
+                    <div class="farmer-grid-avatar">${avatarHTML}</div>
+                    <div class="farmer-grid-card-meta">
+                        <div class="farmer-grid-card-meta-top">
+                            <h3>${farmer.name}</h3>
+                            <span class="season-badge">${farmer.season || 'Season N/A'}</span>
+                        </div>
+                        <p class="farmer-grid-meta"><i class="fa-solid fa-location-dot"></i> ${farmer.village}</p>
+                        <p class="farmer-grid-meta"><i class="fa-solid fa-phone"></i> ${farmer.phone}</p>
+                        <span class="crop-badge">${isTraders ? 'Items: ' : 'Crops: '}${farmer.cropDetails}</span>
+                    </div>
+                </div>
                 <div class="farmer-grid-actions">
-                    <button class="gold-btn btn-sm">View Details & Digitize</button>
+                    <button class="gold-btn btn-sm" type="button" onclick="selectFarmerInView(${farmer.id})">View</button>
+                    <button class="gold-btn-danger btn-sm" type="button" onclick="openDeleteFarmerModal(${farmer.id}, '${farmer.name.replace(/'/g, "\\'")}')">Delete</button>
                 </div>
             </div>
         `;
@@ -1721,8 +1801,31 @@ function clearFarmerSelection() {
     renderFarmersPlaceholderGrid(document.getElementById('farmer-search-input').value);
 }
 
+function openDeleteFarmerModal(farmerId, farmerName) {
+    const modal = document.getElementById('delete-farmer-modal');
+    const message = document.getElementById('delete-farmer-message');
+    const confirmBtn = document.getElementById('confirm-delete-farmer-btn');
+
+    if (!modal || !message || !confirmBtn) return;
+    message.innerText = `Delete ${farmerName}? This will remove the farmer, all photos and notebook records permanently.`;
+    confirmBtn.onclick = async () => {
+        try {
+            const res = await fetch(`${API_BASE}/farmers/${farmerId}`, { method: 'DELETE' });
+            if (res.ok) {
+                selectedFarmerId = selectedFarmerId === farmerId ? null : selectedFarmerId;
+                loadFarmersDirectory();
+            }
+        } catch (err) {
+            console.error('Error deleting farmer', err);
+        } finally {
+            toggleModal('delete-farmer-modal', false);
+        }
+    };
+    toggleModal('delete-farmer-modal', true);
+}
+
 // Global view mode for Farmers List
-let farmerViewMode = 'grid';
+let farmerViewMode = 'list';
 
 function setFarmerViewMode(mode) {
     farmerViewMode = mode;
@@ -1839,6 +1942,7 @@ function openEditFarmerFormInline() {
     document.getElementById('inline-farmer-phone').value = farmer.phone;
     document.getElementById('inline-farmer-village').value = farmer.village;
     document.getElementById('inline-farmer-crop').value = farmer.cropDetails;
+    document.getElementById('inline-farmer-season').value = farmer.season || '2025-26';
 }
 
 function cancelInlineForm() {
@@ -1859,7 +1963,7 @@ async function saveInlineFarmer(event) {
     const village = document.getElementById('inline-farmer-village').value;
     const cropDetails = document.getElementById('inline-farmer-crop').value;
 
-    const data = { name, phone, village, cropDetails, shopType: currentShopType };
+    const data = { name, phone, village, cropDetails, season: document.getElementById('inline-farmer-season').value, shopType: currentShopType };
     
     try {
         let res;
