@@ -1,0 +1,22 @@
+[ {
+  "farmerId" : 4,
+  "id" : 2,
+  "imagePath" : ".\\data\\photos\\notebooks\\farmer_4_page_1783159206538.jpg",
+  "notes" : "Kali Somayya Notebook Page 1",
+  "uploadDate" : "2026-07-04",
+  "year" : null
+}, {
+  "farmerId" : 5,
+  "id" : 3,
+  "imagePath" : ".\\data\\photos\\notebooks\\farmer_5_page_1783171869522.jpg",
+  "notes" : "Sri Srinivasa Agri Traders Purchase Invoice Page 1",
+  "uploadDate" : "2026-07-04",
+  "year" : ""
+}, {
+  "farmerId" : 6,
+  "id" : 4,
+  "imagePath" : ".\\data\\photos\\notebooks\\farmer_6_page_1783171869561.jpg",
+  "notes" : "Guntur Chilli Merchants Association Purchase Invoice Page 1",
+  "uploadDate" : "2026-07-04",
+  "year" : ""
+} ]

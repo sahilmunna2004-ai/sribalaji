@@ -1,0 +1,211 @@
+[ {
+  "amount" : 4500.0,
+  "date" : "2025-06-11",
+  "description" : "Opening balance (16)",
+  "farmerId" : 3,
+  "id" : 1,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "ADVANCE"
+}, {
+  "amount" : 1800.0,
+  "date" : "2025-06-27",
+  "description" : "Anuc (2 bags)",
+  "farmerId" : 3,
+  "id" : 2,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "BILL"
+}, {
+  "amount" : 7000.0,
+  "date" : "2025-07-01",
+  "description" : "20-20 fertilizer (5 bags)",
+  "farmerId" : 3,
+  "id" : 3,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "BILL"
+}, {
+  "amount" : 900.0,
+  "date" : "2025-07-04",
+  "description" : "5-10-10 seeds (1 bag)",
+  "farmerId" : 3,
+  "id" : 4,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "BILL"
+}, {
+  "amount" : 10000.0,
+  "date" : "2025-07-07",
+  "description" : "Cash loan",
+  "farmerId" : 3,
+  "id" : 5,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "ADVANCE"
+}, {
+  "amount" : 1400.0,
+  "date" : "2025-08-01",
+  "description" : "Urea fertilizer (3 bags)",
+  "farmerId" : 3,
+  "id" : 6,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "BILL"
+}, {
+  "amount" : 2800.0,
+  "date" : "2025-08-11",
+  "description" : "20-20 fertilizer (2 bags)",
+  "farmerId" : 3,
+  "id" : 7,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "BILL"
+}, {
+  "amount" : 7250.0,
+  "date" : "2025-06-23",
+  "description" : "Opening balance (83)",
+  "farmerId" : 4,
+  "id" : 8,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "ADVANCE"
+}, {
+  "amount" : 2700.0,
+  "date" : "2025-06-29",
+  "description" : "Seeds purchase (126)",
+  "farmerId" : 4,
+  "id" : 9,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "BILL"
+}, {
+  "amount" : 4200.0,
+  "date" : "2025-07-02",
+  "description" : "20-20 fertilizer (3 bags)",
+  "farmerId" : 4,
+  "id" : 10,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "BILL"
+}, {
+  "amount" : 3000.0,
+  "date" : "2025-07-11",
+  "description" : "Cash advance loan",
+  "farmerId" : 4,
+  "id" : 11,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "ADVANCE"
+}, {
+  "amount" : 1400.0,
+  "date" : "2025-07-15",
+  "description" : "Paddy seeds (1 bag)",
+  "farmerId" : 4,
+  "id" : 12,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "BILL"
+}, {
+  "amount" : 7000.0,
+  "date" : "2025-07-19",
+  "description" : "20-20 fertilizer (5 bags)",
+  "farmerId" : 4,
+  "id" : 13,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "BILL"
+}, {
+  "amount" : 1400.0,
+  "date" : "2025-07-27",
+  "description" : "Urea (5 bags)",
+  "farmerId" : 4,
+  "id" : 14,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "ENTERPRISES",
+  "type" : "BILL"
+}, {
+  "amount" : 120000.0,
+  "date" : "2025-06-10",
+  "description" : "Wholesale Paddy Seeds Purchase (100 bags)",
+  "farmerId" : 5,
+  "id" : 15,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "TRADERS",
+  "type" : "BILL"
+}, {
+  "amount" : 100000.0,
+  "date" : "2025-06-15",
+  "description" : "Part payment via Bank Transfer",
+  "farmerId" : 5,
+  "id" : 16,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "TRADERS",
+  "type" : "PAYMENT"
+}, {
+  "amount" : 80000.0,
+  "date" : "2025-07-05",
+  "description" : "Cotton Seeds Purchase (50 bags)",
+  "farmerId" : 5,
+  "id" : 17,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "TRADERS",
+  "type" : "BILL"
+}, {
+  "amount" : 150000.0,
+  "date" : "2025-06-18",
+  "description" : "Urea Fertilizer Purchase (200 bags)",
+  "farmerId" : 6,
+  "id" : 18,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "TRADERS",
+  "type" : "BILL"
+}, {
+  "amount" : 150000.0,
+  "date" : "2025-06-25",
+  "description" : "Full settlement payment",
+  "farmerId" : 6,
+  "id" : 19,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "TRADERS",
+  "type" : "PAYMENT"
+}, {
+  "amount" : 210000.0,
+  "date" : "2025-07-12",
+  "description" : "20-20 Fertilizer Purchase (150 bags)",
+  "farmerId" : 6,
+  "id" : 20,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "TRADERS",
+  "type" : "BILL"
+}, {
+  "amount" : 100000.0,
+  "date" : "2025-07-20",
+  "description" : "Cash advance payment",
+  "farmerId" : 6,
+  "id" : 21,
+  "interestApplied" : false,
+  "interestRate" : 0.0,
+  "shopType" : "TRADERS",
+  "type" : "PAYMENT"
+} ]

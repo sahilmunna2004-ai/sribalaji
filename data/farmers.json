@@ -1,0 +1,37 @@
+[ {
+  "cropDetails" : "Chilli - 3 Acres",
+  "id" : 4,
+  "name" : "Kali Somayya",
+  "phone" : "9866091953",
+  "photoPath" : null,
+  "season" : null,
+  "shopType" : "ENTERPRISES",
+  "village" : "Veyaluru"
+}, {
+  "cropDetails" : "Seeds & Fertilizer Wholesale",
+  "id" : 5,
+  "name" : "Sri Srinivasa Agri Traders",
+  "phone" : "9848011223",
+  "photoPath" : null,
+  "season" : null,
+  "shopType" : "TRADERS",
+  "village" : "Vijayawada"
+}, {
+  "cropDetails" : "Chilli Trading & Brokerage",
+  "id" : 6,
+  "name" : "Guntur Chilli Merchants Association",
+  "phone" : "9440188990",
+  "photoPath" : null,
+  "season" : null,
+  "shopType" : "TRADERS",
+  "village" : "Guntur"
+}, {
+  "cropDetails" : "Turmeric - 3 Acres",
+  "id" : 7,
+  "name" : "T. Narayana Rao",
+  "phone" : "9767822577",
+  "photoPath" : null,
+  "season" : "2025-26",
+  "shopType" : "ENTERPRISES",
+  "village" : "Mangalagiri"
+} ]

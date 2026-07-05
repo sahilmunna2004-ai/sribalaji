@@ -1,7 +1,7 @@
 package com.balaji.traders.controller;
 
 import com.balaji.traders.model.Transaction;
-import com.balaji.traders.repository.TransactionRepository;
+import com.balaji.traders.repository.file.TransactionFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class TransactionController {
 
     @Autowired
-    private TransactionRepository transactionRepository;
+    private TransactionFileRepository transactionRepository;
 
     @GetMapping
     public List<Transaction> getTransactions(@RequestParam String shopType) {

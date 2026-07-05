@@ -8,7 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="0">
     <!-- PWA Support -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d4af37">
@@ -23,20 +26,20 @@
         <div class="login-card">
             <div class="login-header">
                 <i class="fa-solid fa-om divine-icon"></i>
-                <h2>శ్రీ వేంకటేశ్వర ప్రసన్న</h2>
+                <h2>శ్రీ వెంకటేశ్వర ప్రసన్న</h2>
                 <h1>శ్రీ బాలాజీ ట్రేడర్స్</h1>
                 <p>Sri Balaji Traders & Enterprises</p>
             </div>
             
-            <form id="login-form">
+            <form id="login-form" method="post" onsubmit="return false;">
                 <div class="input-group">
                     <label for="username"><i class="fa-solid fa-user"></i> Username</label>
-                    <input type="text" id="username" required autocomplete="username" placeholder="Enter username">
+                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="Enter username">
                 </div>
                 
                 <div class="input-group">
                     <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
-                    <input type="password" id="password" required autocomplete="current-password" placeholder="Enter password">
+                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter password">
                 </div>
                 
                 <div id="login-error" class="error-msg hide">
@@ -259,52 +262,71 @@
                     </div>
 
                     <div class="split-view-container mt-2">
-                        <!-- Left Column: Farmers List, Search & View Toggles -->
-                        <div class="split-left glass-card">
-                            <div class="search-bar-container">
-                                <input type="text" id="farmer-search-input" placeholder="🔍 Search farmer by name/village...">
-                                <button class="gold-btn mt-2 btn-block" onclick="openAddFarmerFormInline()"><i class="fa-solid fa-user-plus"></i> Add New Farmer</button>
-                            </div>
-                            
-                            <!-- Main OCR Upload Zone -->
-                            <div class="main-ocr-uploader glass-card mt-2 p-2" style="border: 2px dashed rgba(212,175,55,0.4); text-align: center; border-radius: 8px;">
-                                <label for="main-ocr-input" style="cursor: pointer; display: block; margin: 0;">
-                                    <i class="fa-solid fa-file-invoice gold-text" style="font-size: 1.5rem; margin-bottom: 5px;"></i>
-                                    <p style="font-size: 0.85rem; margin: 0; font-weight: 600; color: var(--gold-light);">Bulk OCR / Auto-Register Farmer</p>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Upload page to auto-add profile</span>
-                                </label>
-                                <input type="file" id="main-ocr-input" accept="image/*" class="hide" onchange="triggerMainOCRUpload(event)">
-                            </div>
-
-                            <!-- View Toggles -->
-                            <div class="view-toggles mt-2" style="display: flex; gap: 8px; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
-                                <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">View Mode:</span>
-                                <div class="toggle-buttons" style="display: flex; gap: 4px;">
-                                    <button class="gold-btn-outline btn-sm active" onclick="setFarmerViewMode('grid')" id="btn-view-grid" title="Grid View" style="padding: 4px 8px; font-size: 0.75rem;"><i class="fa-solid fa-table-cells-large"></i> Grid</button>
-                                    <button class="gold-btn-outline btn-sm" onclick="setFarmerViewMode('tile')" id="btn-view-tile" title="Tile View" style="padding: 4px 8px; font-size: 0.75rem;"><i class="fa-solid fa-table-cells"></i> Tile</button>
-                                    <button class="gold-btn-outline btn-sm" onclick="setFarmerViewMode('list')" id="btn-view-list" title="List View" style="padding: 4px 8px; font-size: 0.75rem;"><i class="fa-solid fa-list"></i> List</button>
+                        <div class="split-right glass-card" id="farmer-detail-view">
+                            <div class="panel-section-header table-header-row">
+                                <div>
+                                    <h3><i class="fa-solid fa-users"></i> Registered Farmers List</h3>
+                                    <p>Select a farmer from the list to view details, upload notebook pages, or manage ledger entries.</p>
+                                </div>
+                                <div class="table-header-actions">
+                                    <div class="search-bar">
+                                        <input type="text" id="farmer-search-input" placeholder="🔍 Search farmer by name/village..." />
+                                    </div>
+                                    <button class="gold-btn btn-sm add-farmer-btn" onclick="openFarmerEntryModal()" title="Add Farmer">
+                                        <i class="fa-solid fa-user-plus"></i> Add Farmer
+                                    </button>
                                 </div>
                             </div>
-                            
-                            <div class="farmers-list-wrapper mt-2">
-                                <ul id="farmers-list" class="farmers-list-group">
-                                    <!-- Dynamic list items of farmers -->
-                                </ul>
+                            <div class="farmers-list-tools">
+                                <div class="directory-metric-badge compact">
+                                    <div class="directory-badge-icon">
+                                        <i class="fa-solid fa-seedling"></i>
+                                    </div>
+                                    <div class="directory-badge-text">
+                                        <span>Total Farmers</span>
+                                        <strong id="farmers-count-badge">0</strong>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                            <div class="farmers-list-wrapper mt-2">
+                                <div class="table-responsive">
+                                    <table class="farmers-list-table" id="farmers-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Farmer</th>
+                                                <th>Phone</th>
+                                                <th>Season</th>
+                                                <th>Crop / Notes</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="farmers-list">
+                                            <!-- Dynamic rows loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
 
-                        <!-- Right Column: Farmer Details / Inline Form -->
-                        <div class="split-right glass-card" id="farmer-detail-view">
-                            <!-- Placeholder -->
                             <div id="detail-placeholder" style="width: 100%;">
                                 <div class="detail-placeholder-message">
                                     <i class="fa-solid fa-users-viewfinder"></i>
-                                    <p>Select a farmer from the left directory to view profile details, manage profile photos, and digitize handwritten notebooks.</p>
+                                    <p>Select a farmer from the directory to view profile details, manage profile photos, and digitize handwritten notebooks.</p>
                                 </div>
                             </div>
                             
-                            <!-- Detailed view (hidden by default) -->
                             <div class="farmer-detail-content hide" id="detail-main-content">
+                                <div class="detail-summary-row" style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+                                    <div class="summary-box small" style="flex:1; background: rgba(12,12,14,0.6); border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                                        <div style="font-size:0.78rem; color:var(--text-muted);">Amount Taken</div>
+                                        <div id="detail-amount-taken" style="font-size:1.2rem; font-weight:800; color:var(--gold-light);">₹ 0</div>
+                                    </div>
+                                    <div class="summary-box small" style="flex:1; background: rgba(12,12,14,0.6); border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                                        <div style="font-size:0.78rem; color:var(--text-muted);">Interest Accrued</div>
+                                        <div id="detail-interest-accrued" style="font-size:1.2rem; font-weight:800; color:var(--gold-light);">₹ 0</div>
+                                    </div>
+                                </div>
                                 <div class="detail-profile-header">
                                     <div class="profile-avatar-large" id="detail-profile-avatar" onclick="triggerProfilePhotoEdit()">
                                         <!-- Avatar Image dynamic -->
@@ -331,9 +353,12 @@
                                         <strong id="detail-crop-label">Crop details:</strong>
                                         <span id="detail-farmer-crop">-</span>
                                     </div>
+                                    <div class="detail-box">
+                                        <strong>Season:</strong>
+                                        <span id="detail-farmer-season">-</span>
+                                    </div>
                                 </div>
 
-                                <!-- Associated Items/Purchases Section -->
                                 <div class="farmer-purchases-section mt-3">
                                     <h4 style="color: var(--gold-light); font-family: 'Cinzel', serif; font-size: 0.95rem; margin-bottom: 8px;"><i class="fa-solid fa-basket-shopping"></i> Associated Stock & Purchases</h4>
                                     <div class="table-responsive" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
@@ -355,22 +380,18 @@
 
                                 <hr class="gold-hr">
 
-                                <!-- HANDWRITTEN NOTEBOOKS SECTION -->
                                 <div class="notebook-section">
                                     <div class="section-title-flex">
                                         <h3><i class="fa-solid fa-book-open"></i> Paper Notebook Digitizer</h3>
                                         <button class="gold-btn-outline btn-sm" onclick="toggleModal('notebook-upload-modal', true)"><i class="fa-solid fa-upload"></i> Upload Notebook Page</button>
                                     </div>
                                     <p class="section-subtitle">Upload pages of handwritten accounts notebooks. Click on any page to transcribe the data manually into the ledger.</p>
-
-                                    <!-- Gallery Grid -->
                                     <div class="notebook-gallery mt-2" id="notebook-gallery-grid">
                                         <!-- Dynamic notebook page thumbnails -->
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Inline Add/Edit Form (hidden by default) -->
                             <div class="farmer-detail-form-content hide" id="detail-form-content" style="padding: 10px;">
                                 <h3 id="inline-form-title" style="font-family: 'Cinzel', serif; color: var(--gold-light); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;"><i class="fa-solid fa-user-plus"></i> Add Farmer Profile</h3>
                                 <form id="inline-farmer-form" onsubmit="saveInlineFarmer(event)">
@@ -391,9 +412,157 @@
                                         <label for="inline-farmer-crop">Crop Details</label>
                                         <input type="text" id="inline-farmer-crop" placeholder="e.g. Paddy - 5 Acres, Cotton" required>
                                     </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-farmer-season">Season</label>
+                                        <select id="inline-farmer-season" class="gold-select" required>
+                                            <option value="2023-24">2023-24</option>
+                                            <option value="2024-25">2024-25</option>
+                                            <option value="2025-26" selected>2025-26</option>
+                                            <option value="2026-27">2026-27</option>
+                                        </select>
+                                    </div>
                                     <div class="form-actions mt-4" style="display: flex; gap: 10px;">
                                         <button type="submit" class="gold-btn" style="flex: 1;">Save Profile</button>
                                         <button type="button" class="gold-btn-outline" onclick="cancelInlineForm()">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete Farmer Confirmation Modal -->
+                    <div id="delete-farmer-modal" class="modal hide">
+                        <div class="modal-content modal-danger">
+                            <span class="close-modal" onclick="toggleModal('delete-farmer-modal', false)">&times;</span>
+                            <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <h3>Confirm Delete</h3>
+                            <p id="delete-farmer-message">Are you sure you want to delete this farmer?</p>
+                            <div class="modal-actions" style="display:flex; gap:12px; justify-content:center; margin-top:20px;">
+                                <button class="gold-btn-danger" id="confirm-delete-farmer-btn">Delete Forever</button>
+                                <button class="gold-btn-outline" onclick="toggleModal('delete-farmer-modal', false)">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Farmer Entry Modal -->
+                    <div id="farmer-entry-modal" class="modal hide">
+                        <div class="modal-content medium-width">
+                            <span class="close-modal" onclick="toggleModal('farmer-entry-modal', false)">&times;</span>
+                            <div class="modal-heading" style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+                                <div>
+                                    <h3 style="margin:0; font-size:1.25rem;"><i class="fa-solid fa-user-plus"></i> Add Farmer / Upload Page</h3>
+                                    <p style="margin:0.5rem 0 0; color: var(--text-muted); font-size:0.88rem;">Choose whether to upload a handwritten page or add farmer details manually.</p>
+                                </div>
+                                <div class="entry-tab-buttons" style="display:flex; gap:8px;">
+                                    <button type="button" class="tab-button active" onclick="switchFarmerEntryTab('upload')">Upload Image</button>
+                                    <button type="button" class="tab-button" onclick="switchFarmerEntryTab('manual')">Add Manually</button>
+                                </div>
+                            </div>
+
+                            <div id="farmer-entry-upload-panel" class="modal-section">
+                                <form id="farmer-entry-upload-form">
+                                    <div class="form-group">
+                                        <label for="farmer-entry-photo">Upload handwritten farmer page</label>
+                                        <input type="file" id="farmer-entry-photo" accept="image/*" class="gold-input" required>
+                                        <span class="file-name"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="gold-btn btn-block"><i class="fa-solid fa-upload"></i> Upload & Register Farmer</button>
+                                    </div>
+                                    <p style="font-size:0.82rem; color: var(--text-muted); margin-top: 10px;">This will scan the uploaded page and auto-create farmer details for review.</p>
+                                </form>
+                            </div>
+                            <div id="farmer-entry-manual-panel" class="modal-section hide">
+                                <form id="farmer-entry-manual-form">
+                                    <div class="form-group">
+                                        <label for="manual-farmer-name">Farmer Name</label>
+                                        <input type="text" id="manual-farmer-name" class="gold-input" placeholder="Enter full name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-phone">Phone Number</label>
+                                        <input type="tel" id="manual-farmer-phone" class="gold-input" placeholder="Enter 10-digit number" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-village">Village</label>
+                                        <input type="text" id="manual-farmer-village" class="gold-input" placeholder="Enter village" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-crop">Crop Details</label>
+                                        <input type="text" id="manual-farmer-crop" class="gold-input" placeholder="e.g. Paddy - 5 Acres" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-season">Season</label>
+                                        <select id="manual-farmer-season" class="gold-select" required>
+                                            <option value="2023-24">2023-24</option>
+                                            <option value="2024-25">2024-25</option>
+                                            <option value="2025-26" selected>2025-26</option>
+                                            <option value="2026-27">2026-27</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="gold-btn btn-block"><i class="fa-solid fa-save"></i> Add Farmer Manually</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right-side Farmer Entry Drawer (rich panel) -->
+                    <div id="farmer-entry-drawer" class="side-drawer hide" aria-hidden="true">
+                        <div class="side-drawer-content">
+                            <button class="close-drawer" onclick="toggleDrawer('farmer-entry-drawer', false)">×</button>
+                            <div class="modal-heading" style="margin-bottom:12px;">
+                                <h3 style="margin:0; font-size:1.1rem;"><i class="fa-solid fa-user-plus"></i> Add Farmer / Upload Page</h3>
+                                <p style="margin:6px 0 0; color:var(--text-muted); font-size:0.85rem;">Quick add via image or manual entry from the right panel.</p>
+                            </div>
+
+                            <div class="entry-tab-buttons" style="display:flex; gap:8px; margin-bottom:10px;">
+                                <button type="button" class="tab-button active" onclick="switchFarmerEntryTab('upload')">Upload Image</button>
+                                <button type="button" class="tab-button" onclick="switchFarmerEntryTab('manual')">Add Manually</button>
+                            </div>
+
+                            <div id="farmer-entry-upload-panel-drawer" class="modal-section">
+                                <form id="farmer-entry-upload-form-drawer" onsubmit="submitFarmerEntryUpload(event)">
+                                    <div class="form-group">
+                                        <label for="farmer-entry-photo-drawer">Upload handwritten farmer page</label>
+                                        <input type="file" id="farmer-entry-photo-drawer" accept="image/*" class="gold-input" required>
+                                        <span class="file-name"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="gold-btn btn-block"><i class="fa-solid fa-upload"></i> Upload & Register Farmer</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div id="farmer-entry-manual-panel-drawer" class="modal-section hide">
+                                <form id="farmer-entry-manual-form-drawer" onsubmit="submitFarmerEntryManual(event)">
+                                    <div class="form-group">
+                                        <label for="manual-farmer-name-drawer">Farmer Name</label>
+                                        <input type="text" id="manual-farmer-name-drawer" class="gold-input" placeholder="Enter full name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-phone-drawer">Phone Number</label>
+                                        <input type="tel" id="manual-farmer-phone-drawer" class="gold-input" placeholder="Enter 10-digit number" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-village-drawer">Village</label>
+                                        <input type="text" id="manual-farmer-village-drawer" class="gold-input" placeholder="Enter village" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-crop-drawer">Crop Details</label>
+                                        <input type="text" id="manual-farmer-crop-drawer" class="gold-input" placeholder="e.g. Paddy - 5 Acres" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-season-drawer">Season</label>
+                                        <select id="manual-farmer-season-drawer" class="gold-select" required>
+                                            <option value="2023-24">2023-24</option>
+                                            <option value="2024-25">2024-25</option>
+                                            <option value="2025-26" selected>2025-26</option>
+                                            <option value="2026-27">2026-27</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="gold-btn btn-block"><i class="fa-solid fa-save"></i> Add Farmer Manually</button>
                                     </div>
                                 </form>
                             </div>
@@ -432,9 +601,24 @@
                     <!-- Notebook Page Upload Modal -->
                     <div id="notebook-upload-modal" class="modal hide">
                         <div class="modal-content">
-                            <span class="close-modal" onclick="toggleModal('notebook-upload-modal', false)">&times;</span>
-                            <h3><i class="fa-solid fa-upload"></i> Upload Notebook Page</h3>
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 12px;">
+                                <h3 style="margin:0; font-size:1.15rem;"><i class="fa-solid fa-upload"></i> Upload Notebook Page</h3>
+                                <div style="display:flex; gap:8px;">
+                                    <button class="gold-btn-outline btn-sm" type="button" onclick="switchTab('tab-farmers'); toggleModal('notebook-upload-modal', false)"><i class="fa-solid fa-house"></i> Home</button>
+                                    <button class="gold-btn-outline btn-sm" type="button" onclick="toggleModal('notebook-upload-modal', false)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                                </div>
+                            </div>
                             <form id="notebook-upload-form">
+                                <div class="form-group">
+                                    <label for="notebook-year">Select Year / Season</label>
+                                    <select id="notebook-year" class="gold-select" required>
+                                        <option value="" disabled selected>Select year</option>
+                                        <option value="2023-24">2023-24</option>
+                                        <option value="2024-25">2024-25</option>
+                                        <option value="2025-26">2025-26</option>
+                                        <option value="2026-27">2026-27</option>
+                                    </select>
+                                </div>
                                 <div class="form-group">
                                     <label for="notebook-notes">Page Description / Notes</label>
                                     <input type="text" id="notebook-notes" placeholder="e.g. Page 12 - Kharif season advances" required>
@@ -457,9 +641,12 @@
                     <!-- SIDE-BY-SIDE TRANSCRIPTION WORKSPACE MODAL -->
                     <div id="transcription-modal" class="modal hide">
                         <div class="modal-content transcription-modal-content">
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; gap: 10px; flex-wrap: wrap;">
                                 <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0; font-family: 'Cinzel', serif; color: var(--gold-light);"><i class="fa-solid fa-book-reader"></i> Digitization Workspace</h3>
-                                <button class="gold-btn-outline btn-sm" onclick="toggleModal('transcription-modal', false)" style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-arrow-left"></i> Back to Directory</button>
+                                <div style="display:flex; gap:8px; flex-wrap: wrap;">
+                                    <button class="gold-btn-outline btn-sm" onclick="switchTab('tab-farmers'); toggleModal('transcription-modal', false)" style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-house"></i> Home</button>
+                                    <button class="gold-btn-outline btn-sm" onclick="toggleModal('transcription-modal', false)" style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                                </div>
                             </div>
                             
                             <div class="transcription-workspace">
@@ -1083,6 +1270,48 @@
     </div>
 
     <!-- JS Core -->
-    <script src="app.js"></script>
+    <script src="app.js?v=3"></script>
+
+    <!-- Fallback: Auto-redirect after form login -->
+    <script>
+        // If page has token in localStorage, show app immediately
+        function checkAndInitializeApp() {
+            const token = localStorage.getItem('balaji_token');
+            const loginContainer = document.getElementById('login-container');
+            const appContainer = document.getElementById('app-container');
+            
+            if (token && loginContainer && appContainer) {
+                loginContainer.classList.remove('active');
+                appContainer.classList.add('active');
+            }
+        }
+        
+        // Check on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAndInitializeApp);
+        } else {
+            checkAndInitializeApp();
+        }
+        
+        // Also check if user is on the login response page (redirected to /api/auth/login)
+        // and redirect back to home
+        if (window.location.pathname === '/api/auth/login') {
+            setTimeout(() => {
+                // Get the JSON response and check for success
+                fetch(window.location.href)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.token) {
+                            localStorage.setItem('balaji_token', data.token);
+                            window.location.href = '/';
+                        }
+                    })
+                    .catch(() => {
+                        // If JSON parse fails or fetch fails, just redirect home
+                        window.location.href = '/';
+                    });
+            }, 500);
+        }
+    </script>
 </body>
 </html>

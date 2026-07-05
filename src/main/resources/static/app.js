@@ -42,6 +42,7 @@ function verifyPwaVersion() {
 
 // API Base URL (Relative paths because frontend is served by the backend)
 const API_BASE = '/api';
+const ACTIVE_TAB_KEY = 'balaji_active_tab';
 
 // Global Application State
 let sessionToken = localStorage.getItem('balaji_token') || null;
@@ -83,6 +84,12 @@ function setupAuthView() {
     if (sessionToken) {
         loginContainer.classList.remove('active');
         appContainer.classList.add('active');
+        const savedTab = localStorage.getItem(ACTIVE_TAB_KEY) || 'tab-dashboard';
+        if (document.getElementById(savedTab)) {
+            switchTab(savedTab);
+        } else {
+            switchTab('tab-dashboard');
+        }
         onAppLoad();
     } else {
         appContainer.classList.remove('active');
@@ -269,6 +276,15 @@ function setupEventListeners() {
     // Notebook upload form submit
         document.getElementById('notebook-upload-form')?.addEventListener('submit', uploadNotebookPagePhoto);
 
+    // Farmer entry modal handlers
+        document.getElementById('farmer-entry-upload-form')?.addEventListener('submit', submitFarmerEntryUpload);
+        document.getElementById('farmer-entry-manual-form')?.addEventListener('submit', submitFarmerEntryManual);
+        document.getElementById('farmer-entry-photo')?.addEventListener('change', (e) => {
+            const fileName = e.target.files[0] ? e.target.files[0].name : '';
+            const label = document.querySelector('#farmer-entry-upload-form .file-name');
+            if (label) label.innerText = fileName;
+        });
+
     // Zoom listener for transcription page image
     const transImg = document.getElementById('transcription-image');
     transImg.addEventListener('click', () => {
@@ -279,6 +295,7 @@ function setupEventListeners() {
 
 // Switch tabs dynamically
 function switchTab(tabId) {
+    localStorage.setItem(ACTIVE_TAB_KEY, tabId);
     document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     
@@ -318,6 +335,10 @@ function updateShopLabels() {
         lbl.innerText = isTraders ? 'Sri Balaji Traders' : 'Sri Balaji Enterprises';
     });
 
+    // Add an enterprise-only styling flag for header and tab layout
+    document.body.classList.toggle('enterprise-mode', !isTraders);
+    document.body.classList.toggle('traders-mode', isTraders);
+
     // 2. Sidebar Navigation Items (Always visible for multi-directory access)
     const navStock = document.getElementById('nav-stock');
     const navFarmers = document.getElementById('nav-farmers');
@@ -339,17 +360,22 @@ function updateShopLabels() {
 
     // 3. Panel Titles & Form Headers
     // Tab Directory Title
-    const tabFarmersTitle = document.querySelector('#tab-farmers .panel-title');
+    const tabFarmersPanel = document.getElementById('tab-farmers');
+    const tabFarmersTitle = tabFarmersPanel?.querySelector('.panel-title');
     if (tabFarmersTitle) {
         tabFarmersTitle.innerText = isTraders ? "Traders Directory & Invoice Digitizer" : "Farmers Directory & Digitizer";
     }
+    if (tabFarmersPanel) {
+        tabFarmersPanel.classList.toggle('enterprise-mode', !isTraders);
+    }
+
     // Search input placeholder
     const farmerSearchInput = document.getElementById('farmer-search-input');
     if (farmerSearchInput) {
         farmerSearchInput.placeholder = isTraders ? "🔍 Search trader by name/location..." : "🔍 Search farmer by name/village...";
     }
     // Add New button text
-    const addNewBtn = document.querySelector('#tab-farmers .search-bar-container button');
+    const addNewBtn = document.querySelector('#tab-farmers .add-farmer-btn');
     if (addNewBtn) {
         addNewBtn.innerHTML = isTraders ? `<i class="fa-solid fa-user-plus"></i> Add New Trader` : `<i class="fa-solid fa-user-plus"></i> Add New Farmer`;
     }
@@ -705,6 +731,8 @@ async function seedSampleFarmersData() {
 
 function renderFarmersList(filterQuery = '') {
     const listEl = document.getElementById('farmers-list');
+    const badgeEl = document.getElementById('farmers-count-badge');
+    if (!listEl) return;
     listEl.innerHTML = '';
 
     const filtered = activeFarmers.filter(f => {
@@ -713,49 +741,78 @@ function renderFarmersList(filterQuery = '') {
         return matchesText && matchesSeason;
     });
 
+    if (badgeEl) {
+        badgeEl.innerText = filtered.length;
+    }
+
     if (filtered.length === 0) {
-        listEl.innerHTML = `<li class="text-center p-3" style="color: var(--text-muted);">No farmers match query.</li>`;
+        listEl.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-state">No farmers match query.</td>
+            </tr>
+        `;
         return;
     }
 
-    filtered.forEach(farmer => {
+    filtered.forEach((farmer, index) => {
+        const rowIndex = index + 1;
         const isSelected = farmer.id === selectedFarmerId;
-        const avatarSrc = farmer.photoPath 
-            ? `${API_BASE}/farmers/${farmer.id}/photo?t=${new Date().getTime()}` 
+        const avatarSrc = farmer.photoPath
+            ? `${API_BASE}/farmers/${farmer.id}/photo?t=${new Date().getTime()}`
             : '';
 
         const avatarHTML = avatarSrc
             ? `<img src="${avatarSrc}" alt="${farmer.name}">`
             : `<i class="fa-solid fa-user-circle"></i>`;
 
-        const li = document.createElement('li');
-        li.className = `farmer-list-item ${isSelected ? 'selected' : ''}`;
-        li.dataset.id = farmer.id;
-        li.innerHTML = `
-            <div class="farmer-list-item-avatar">${avatarHTML}</div>
-            <div class="farmer-list-item-info">
-                <h4>${farmer.name}</h4>
-                <p><i class="fa-solid fa-location-dot"></i> ${farmer.village}</p>
-                <p style="font-size:0.85rem; color: var(--text-muted);">Season: ${farmer.season || 'N/A'}</p>
-            </div>
-            <div class="farmer-list-item-actions">
-                <button class="gold-btn-outline btn-sm" type="button">Select</button>
-                <button class="gold-btn-danger btn-sm" type="button">Delete</button>
-            </div>
+        const row = document.createElement('tr');
+        row.className = isSelected ? 'selected' : '';
+        row.dataset.id = farmer.id;
+        row.innerHTML = `
+            <td class="number-col" data-label="#">${rowIndex}</td>
+            <td data-label="Farmer">
+                <div class="farmer-cell">
+                    <div class="farmer-list-item-avatar">${avatarHTML}</div>
+                    <div class="farmer-list-item-info">
+                        <h4>${farmer.name}</h4>
+                        <p>${farmer.village || 'Unknown village'}</p>
+                    </div>
+                </div>
+            </td>
+            <td data-label="Phone">${farmer.phone || '-'}</td>
+            <td data-label="Season">${farmer.season || 'N/A'}</td>
+            <td data-label="Crop / Notes">${farmer.cropDetails || 'No crop details'}</td>
+            <td data-label="Status"><span class="status-pill">${farmer.status || 'Active'}</span></td>
+            <td class="actions-col" data-label="Actions">
+                <div class="action-button-group">
+                    <button class="gold-btn btn-sm" type="button">View</button>
+                    <button class="gold-btn-danger btn-sm" type="button">Delete</button>
+                </div>
+            </td>
         `;
 
-        const buttons = li.querySelectorAll('button');
-        buttons[0].addEventListener('click', () => {
-            document.querySelectorAll('.farmer-list-item').forEach(item => item.classList.remove('selected'));
-            li.classList.add('selected');
+        const viewButton = row.querySelector('.gold-btn.btn-sm');
+        const deleteButton = row.querySelector('.gold-btn-danger');
+
+        viewButton?.addEventListener('click', (event) => {
+            event.stopPropagation();
             selectFarmerInView(farmer.id);
+            document.querySelectorAll('.farmers-list-table tbody tr').forEach(item => item.classList.remove('selected'));
+            row.classList.add('selected');
         });
-        buttons[1].addEventListener('click', async (event) => {
+
+        deleteButton?.addEventListener('click', (event) => {
             event.stopPropagation();
             openDeleteFarmerModal(farmer.id, farmer.name);
         });
 
-        listEl.appendChild(li);
+        row.addEventListener('click', () => {
+            selectFarmerInView(farmer.id);
+            document.querySelectorAll('.farmers-list-table tbody tr').forEach(item => item.classList.remove('selected'));
+            row.classList.add('selected');
+        });
+
+        listEl.appendChild(row);
     });
 }
 
@@ -805,6 +862,22 @@ async function selectFarmerInView(id) {
 
     // Load multiple notebook pages gallery
     loadNotebookGallery(farmer.id);
+
+    // Fetch financial summary (amount taken, interest)
+    (async () => {
+        try {
+            const res = await fetch(`${API_BASE}/transactions/farmer/${farmer.id}/summary?shopType=${currentShopType}`);
+            if (res.ok) {
+                const summary = await res.json();
+                const amountEl = document.getElementById('detail-amount-taken');
+                const interestEl = document.getElementById('detail-interest-accrued');
+                if (amountEl) amountEl.innerText = `₹ ${ (summary.totalTaken || 0).toLocaleString('en-IN', {minimumFractionDigits:2}) }`;
+                if (interestEl) interestEl.innerText = `₹ ${ (summary.interestAccrued || 0).toLocaleString('en-IN', {minimumFractionDigits:2}) }`;
+            }
+        } catch (err) {
+            console.error('Error fetching farmer financial summary', err);
+        }
+    })();
 
     // Reveal main detail block
     document.getElementById('detail-placeholder').classList.add('hide');
@@ -1729,64 +1802,10 @@ function renderFarmersPlaceholderGrid(filterQuery = '') {
     const placeholder = document.getElementById('detail-placeholder');
     if (!placeholder) return;
 
-    const isTraders = currentShopType === 'TRADERS';
-    const query = filterQuery.toLowerCase();
-    const filtered = activeFarmers.filter(f => {
-        const matchesQuery = f.name.toLowerCase().includes(query) || f.village.toLowerCase().includes(query);
-        const matchesSeason = !selectedSeason || selectedSeason === 'ALL' || f.season === selectedSeason;
-        return matchesQuery && matchesSeason;
-    });
-
-    if (filtered.length === 0) {
-        placeholder.innerHTML = `
-            <div class="detail-placeholder-message">
-                <i class="fa-solid fa-users-viewfinder"></i>
-                <p>No ${isTraders ? 'traders' : 'farmers'} match your search query.</p>
-            </div>
-        `;
-        return;
-    }
-
-    const modeClass = farmerViewMode === 'tile' ? 'tile-mode' : farmerViewMode === 'list' ? 'list-mode' : '';
-    let cardsHTML = '';
-    filtered.forEach(farmer => {
-        const avatarSrc = farmer.photoPath 
-            ? `${API_BASE}/farmers/${farmer.id}/photo?t=${new Date().getTime()}` 
-            : '';
-
-        const avatarHTML = avatarSrc
-            ? `<img src="${avatarSrc}" alt="${farmer.name}">`
-            : `<i class="fa-solid fa-user-circle"></i>`;
-
-        cardsHTML += `
-            <div class="farmer-grid-card ${farmerViewMode === 'list' ? 'farmer-grid-card-list' : ''}">
-                <div class="farmer-grid-card-inner" onclick="selectFarmerInView(${farmer.id})">
-                    <div class="farmer-grid-avatar">${avatarHTML}</div>
-                    <div class="farmer-grid-card-meta">
-                        <div class="farmer-grid-card-meta-top">
-                            <h3>${farmer.name}</h3>
-                            <span class="season-badge">${farmer.season || 'Season N/A'}</span>
-                        </div>
-                        <p class="farmer-grid-meta"><i class="fa-solid fa-location-dot"></i> ${farmer.village}</p>
-                        <p class="farmer-grid-meta"><i class="fa-solid fa-phone"></i> ${farmer.phone}</p>
-                        <span class="crop-badge">${isTraders ? 'Items: ' : 'Crops: '}${farmer.cropDetails}</span>
-                    </div>
-                </div>
-                <div class="farmer-grid-actions">
-                    <button class="gold-btn btn-sm" type="button" onclick="selectFarmerInView(${farmer.id})">View</button>
-                    <button class="gold-btn-danger btn-sm" type="button" onclick="openDeleteFarmerModal(${farmer.id}, '${farmer.name.replace(/'/g, "\\'")}')">Delete</button>
-                </div>
-            </div>
-        `;
-    });
-
     placeholder.innerHTML = `
-        <div class="placeholder-grid-header">
-            <h3><i class="fa-solid fa-users"></i> Registered ${isTraders ? 'Traders' : 'Farmers'} List</h3>
-            <p>Select a ${isTraders ? 'trader' : 'farmer'} from the list below or use the sidebar directory to view details.</p>
-        </div>
-        <div class="farmer-placeholder-grid ${modeClass}">
-            ${cardsHTML}
+        <div class="detail-placeholder-message">
+            <i class="fa-solid fa-users-viewfinder"></i>
+            <p>Select a farmer from the table above to view profile details, manage photos, or digitize notebooks.</p>
         </div>
     `;
 }
@@ -1917,6 +1936,147 @@ function openAddFarmerFormInline() {
     document.getElementById('inline-farmer-phone').value = '';
     document.getElementById('inline-farmer-village').value = '';
     document.getElementById('inline-farmer-crop').value = '';
+}
+
+function openFarmerEntryModal() {
+    // Open the centered modal for adding a farmer (preferred UX)
+    switchFarmerEntryTab('upload');
+    toggleModal('farmer-entry-modal', true);
+}
+
+// Toggle a right-side drawer element by id
+function toggleDrawer(id, show) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (show) {
+        el.classList.remove('hide');
+        document.body.classList.add('drawer-open');
+        setTimeout(() => el.classList.add('open'), 10);
+    } else {
+        el.classList.remove('open');
+        document.body.classList.remove('drawer-open');
+        setTimeout(() => el.classList.add('hide'), 300);
+    }
+}
+
+function switchFarmerEntryTab(tab) {
+    const activeUpload = tab === 'upload';
+    // Toggle buttons in both modal and drawer (if present)
+    document.querySelectorAll('#farmer-entry-modal .tab-button, #farmer-entry-drawer .tab-button').forEach(btn => {
+        const isUploadButton = btn.textContent.trim().startsWith('Upload');
+        btn.classList.toggle('active', isUploadButton === activeUpload);
+    });
+    // Panels for modal
+    const uploadPanel = document.getElementById('farmer-entry-upload-panel');
+    const manualPanel = document.getElementById('farmer-entry-manual-panel');
+    if (uploadPanel && manualPanel) {
+        uploadPanel.classList.toggle('hide', !activeUpload);
+        manualPanel.classList.toggle('hide', activeUpload);
+    }
+    // Panels for drawer
+    const uploadPanelD = document.getElementById('farmer-entry-upload-panel-drawer');
+    const manualPanelD = document.getElementById('farmer-entry-manual-panel-drawer');
+    if (uploadPanelD && manualPanelD) {
+        uploadPanelD.classList.toggle('hide', !activeUpload);
+        manualPanelD.classList.toggle('hide', activeUpload);
+    }
+}
+
+async function submitFarmerEntryUpload(event) {
+    event.preventDefault();
+    const fileInput = document.getElementById('farmer-entry-photo') || document.getElementById('farmer-entry-photo-drawer');
+    const file = fileInput ? fileInput.files[0] : null;
+    if (!file) {
+        alert('Please select an image to upload.');
+        return;
+    }
+
+    // Use the existing OCR simulation to register a farmer from the page image
+    const names = ['M. Venkateswarlu', 'T. Narayana Rao', 'P. Krishna Murthy', 'G. Sita Ramaiah'];
+    const villages = ['Bapatla', 'Tenali', 'Mangalagiri', 'Chebrolu'];
+    const crops = ['Cotton - 4 Acres', 'Paddy - 6 Acres', 'Chilli - 2 Acres', 'Turmeric - 3 Acres'];
+    const randomName = names[Math.floor(Math.random() * names.length)];
+    const randomVillage = villages[Math.floor(Math.random() * villages.length)];
+    const randomCrop = crops[Math.floor(Math.random() * crops.length)];
+    const randomPhone = '9' + Math.floor(100000000 + Math.random() * 900000000);
+
+    const data = {
+        name: randomName,
+        phone: randomPhone,
+        village: randomVillage,
+        cropDetails: randomCrop,
+        season: '2025-26',
+        shopType: currentShopType
+    };
+
+    try {
+        const res = await fetch(`${API_BASE}/farmers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            const saved = await res.json();
+            // close drawer if present
+            if (document.getElementById('farmer-entry-drawer') && !document.getElementById('farmer-entry-modal').classList.contains('open')) {
+                toggleDrawer('farmer-entry-drawer', false);
+            } else {
+                toggleModal('farmer-entry-modal', false);
+            }
+            if (fileInput) fileInput.value = '';
+            const formFileName = document.querySelector('#farmer-entry-upload-form .file-name') || document.querySelector('#farmer-entry-upload-form-drawer .file-name');
+            if (formFileName) formFileName.innerText = '';
+            loadFarmersDirectory();
+            selectFarmerInView(saved.id);
+        } else {
+            alert('Unable to register farmer from the uploaded page.');
+        }
+    } catch (err) {
+        console.error('Error registering farmer from page upload', err);
+        alert('Upload failed. Please try again.');
+    }
+}
+
+async function submitFarmerEntryManual(event) {
+    event.preventDefault();
+    const name = document.getElementById('manual-farmer-name').value.trim();
+    const phone = document.getElementById('manual-farmer-phone').value.trim();
+    const village = document.getElementById('manual-farmer-village').value.trim();
+    const cropDetails = document.getElementById('manual-farmer-crop').value.trim();
+    const season = document.getElementById('manual-farmer-season').value;
+
+    if (!name || !phone || !village || !cropDetails) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+
+    const data = { name, phone, village, cropDetails, season, shopType: currentShopType };
+    try {
+        const res = await fetch(`${API_BASE}/farmers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (res.ok) {
+            const saved = await res.json();
+            // close drawer if used
+            if (document.getElementById('farmer-entry-drawer') && !document.getElementById('farmer-entry-modal').classList.contains('open')) {
+                toggleDrawer('farmer-entry-drawer', false);
+            } else {
+                toggleModal('farmer-entry-modal', false);
+            }
+            const manualForm = document.getElementById('farmer-entry-manual-form') || document.getElementById('farmer-entry-manual-form-drawer');
+            if (manualForm) manualForm.reset();
+            loadFarmersDirectory();
+            selectFarmerInView(saved.id);
+        } else {
+            alert('Failed to add farmer manually.');
+        }
+    } catch (err) {
+        console.error('Error adding farmer manually', err);
+        alert('Save failed. Please try again.');
+    }
 }
 
 function openEditFarmerFormInline() {

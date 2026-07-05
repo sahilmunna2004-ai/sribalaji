@@ -1,7 +1,7 @@
 package com.balaji.traders.controller;
 
 import com.balaji.traders.model.Stock;
-import com.balaji.traders.repository.StockRepository;
+import com.balaji.traders.repository.file.StockFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class StockController {
 
     @Autowired
-    private StockRepository stockRepository;
+    private StockFileRepository stockRepository;
 
     @GetMapping
     public List<Stock> getStock(@RequestParam String shopType) {

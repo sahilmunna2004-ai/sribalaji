@@ -19,6 +19,7 @@ public class Farmer {
     private String cropDetails;
     private String photoPath;
     private String shopType; // "ENTERPRISES" or "TRADERS"
+    private String season; // e.g. 2025-26
 
     // Default Constructor
     public Farmer() {}
@@ -44,4 +45,7 @@ public class Farmer {
 
     public String getShopType() { return shopType; }
     public void setShopType(String shopType) { this.shopType = shopType; }
+
+    public String getSeason() { return season; }
+    public void setSeason(String season) { this.season = season; }
 }

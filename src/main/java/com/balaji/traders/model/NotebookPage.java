@@ -18,6 +18,7 @@ public class NotebookPage {
     private String imagePath;
     private LocalDate uploadDate;
     private String notes;
+    private String year;
 
     // Default Constructor
     public NotebookPage() {}
@@ -37,4 +38,7 @@ public class NotebookPage {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public String getYear() { return year; }
+    public void setYear(String year) { this.year = year; }
 }
