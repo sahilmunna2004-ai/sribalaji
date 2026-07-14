@@ -25,12 +25,19 @@
     box-sizing: border-box;
 }
 
+html, body {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
 body {
     font-family: 'Outfit', sans-serif;
     background-color: var(--bg-dark);
     color: var(--text-white);
-    min-height: 100vh;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 /* Full-page Background Image of Venkateswara Swamy with Dark Overlay */
@@ -51,6 +58,9 @@ body {
 .page-container {
     display: none;
     min-height: 100vh;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
 }
 
 .page-container.active {
@@ -61,61 +71,270 @@ body {
 /* 1. LOGIN STYLING */
 #login-container {
     display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+    padding: 0;
+    min-height: 100vh;
 }
 
 #login-container.active {
     display: flex;
 }
 
-.login-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px var(--gold-glow);
-    border-radius: 16px;
-    width: 100%;
-    max-width: 440px;
+#login-container.active.login-split-layout {
+    display: flex;
+    flex-direction: row;
+}
+
+.login-form-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 40px 60px;
+    background: linear-gradient(135deg, rgba(12, 12, 14, 0.95), rgba(20, 15, 8, 0.92));
+}
+
+.login-image-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 40px;
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    animation: fadeInUp 0.8s ease;
+    background: linear-gradient(to bottom right, rgba(212, 175, 55, 0.15), rgba(12, 12, 14, 0.92));
+    border-left: 2px solid var(--border-color);
+}
+
+/* Keep the login form on the left and deity image on the right */
+#login-container.active.login-split-layout .login-form-wrapper {
+    order: 1;
+}
+#login-container.active.login-split-layout .login-image-wrapper {
+    order: 2;
+}
+
+/* On wide screens place the deity image as a right-side background behind the login card */
+@media (min-width: 900px) {
+    #login-container.active.login-split-layout {
+        position: relative;
+        align-items: stretch;
+    }
+
+    .login-form-wrapper {
+        position: relative;
+        z-index: 2; /* sit above the deity background */
+        flex: 0 0 46%;
+        padding: 60px 48px;
+        max-width: 46%;
+    }
+
+    .login-image-wrapper {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 54%;
+        padding: 0 40px;
+        background: linear-gradient(to right, rgba(12,12,14,0.40), rgba(12,12,14,0.65));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1; /* behind the form but above the page background */
+    }
+
+    .login-divine-image img.deity-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 0 0 0 0;
+        opacity: 0.95;
+        box-shadow: none;
+    }
+}
+
+#home-mode-section {
+    display: none;
+}
+#home-mode-section.visible {
+    display: block;
+}
+
+/* Sidebar deity image (used when home-mode buttons are shown in sidebar) */
+.sidebar-deity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 10px;
+}
+.sidebar-deity img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Sidebar deity improvements */
+.sidebar-deity-img {
+    width: 100%;
+    max-width: 160px;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.6), 0 6px 18px rgba(212,175,55,0.08) inset;
+    border: 1px solid rgba(212,175,55,0.10);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.sidebar-deity-img:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 18px 40px rgba(0,0,0,0.7), 0 8px 22px rgba(212,175,55,0.12) inset; }
+
+/* Compact mode toggle buttons */
+.compact-mode-toggle { padding-bottom: 6px; }
+.compact-mode-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    color: var(--text-muted);
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.28s ease;
+}
+.compact-mode-btn i { font-size: 1.05rem; }
+.compact-mode-btn:hover { transform: translateY(-3px); color: var(--gold-light); border-color: rgba(212,175,55,0.24); }
+.compact-mode-btn.active { background: linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%); color: #111; box-shadow: 0 8px 24px rgba(212,175,55,0.18); border-color: rgba(212,175,55,0.6); }
+
+/* keyboard focus ring for accessibility */
+.compact-mode-btn:focus {
+    outline: 3px solid rgba(212,175,55,0.28);
+    outline-offset: 3px;
+}
+
+/* Smooth show/hide transitions for home-mode section and central buttons */
+[data-animate] {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 300ms ease, transform 300ms ease;
+    pointer-events: none;
+}
+[data-animate].visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* animate the entire home-mode section fade/slide */
+#home-mode-section { opacity: 0; transform: translateX(-6px); transition: opacity 320ms ease, transform 320ms ease; }
+#home-mode-section.visible { opacity: 1; transform: translateX(0); }
+
+.business-nav-buttons {
+    transition: opacity 300ms ease, transform 300ms ease;
+}
+.business-nav-buttons.hidden {
+    opacity: 0;
+    transform: scale(0.98) translateY(6px);
+    pointer-events: none;
+}
+.business-nav-buttons.visible { opacity: 1; transform: none; pointer-events: auto; }
+
+/* Slightly tighter spacing and hover polish for main center buttons */
+.mode-action-btn { box-shadow: 0 8px 24px rgba(0,0,0,0.28); }
+.mode-action-btn:hover { transform: translateY(-6px) scale(1.01); }
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    /* Stack login sections vertically on small screens and show form first */
+    #login-container.active.login-split-layout {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #login-container.active.login-split-layout .login-form-wrapper {
+        order: 1;
+        padding: 20px;
+    }
+    #login-container.login-split-layout .login-image-wrapper {
+        order: 2;
+        padding: 12px;
+        height: 260px;
+    }
+    .login-divine-image, .login-divine-image img {
+        border-radius: 8px;
+        object-fit: contain;
+        height: 100%;
+        width: 100%;
+    }
+
+    /* Keep the sidebar available on tablet and desktop widths */
+    .app-sidebar { display: block !important; }
+    body.home-mode .business-nav-buttons { display: none !important; }
+}
+
+body.home-mode .app-sidebar {
+    display: block;
+    width: 280px;
+}
+body.home-mode .business-nav-buttons {
+    display: none !important;
+}
+
+.login-divine-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 40px var(--gold-glow), inset 0 0 30px rgba(212, 175, 55, 0.1);
+    border: 2px solid var(--border-focus);
+}
+
+.deity-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.login-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    width: 100%;
+    max-width: 420px;
+    padding: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    animation: slideInLeft 0.8s ease;
 }
 
 .login-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
 }
 
 .divine-icon {
-    font-size: 3rem;
+    font-size: 3.5rem;
     color: var(--gold);
-    text-shadow: 0 0 15px var(--gold-glow);
-    margin-bottom: 12px;
+    text-shadow: 0 0 20px var(--gold-glow);
+    margin-bottom: 18px;
     animation: pulse 2.5s infinite alternate;
-}
-
-.login-header h2 {
-    font-family: 'Cinzel', serif;
-    font-size: 1.25rem;
-    color: var(--gold-light);
-    margin-bottom: 6px;
-    letter-spacing: 1px;
 }
 
 .login-header h1 {
     font-family: 'Cinzel', serif;
-    font-size: 1.8rem;
+    font-size: 2rem;
     color: var(--gold);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    margin-bottom: 4px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    margin-bottom: 6px;
+    line-height: 1.2;
 }
 
 .login-header p {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--text-muted);
     letter-spacing: 0.5px;
+    font-weight: 500;
 }
 
 /* Input Fields & Forms */
@@ -253,7 +472,13 @@ input:focus, select:focus {
 
 /* 2. APP SHELL STYLING */
 #app-container {
+    display: none;
     background: transparent;
+}
+
+#app-container.active {
+    display: flex;
+    flex-direction: column;
 }
 
 .app-header {
@@ -323,6 +548,7 @@ input:focus, select:focus {
     font-size: 0.9rem;
     cursor: pointer;
     font-weight: 600;
+    flex-shrink: 0;
 }
 
 .gold-select option {
@@ -359,6 +585,26 @@ input:focus, select:focus {
 .header-icon-btn.logout:hover {
     border-color: var(--danger);
     color: var(--danger);
+}
+
+#language-selector {
+    background: rgba(30, 30, 35, 0.6);
+    border: 1px solid var(--border-color);
+    color: var(--gold-light);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: auto;
+    width: auto;
+}
+
+#language-selector:hover {
+    border-color: var(--gold);
+}
+
+#language-selector option {
+    background: var(--bg-dark);
+    color: var(--text-white);
 }
 
 /* APP BODY LAYOUT */
@@ -411,6 +657,40 @@ input:focus, select:focus {
     text-shadow: 0 0 5px var(--gold-glow);
 }
 
+body.traders-mode .app-sidebar {
+    background: linear-gradient(180deg, rgba(10, 24, 18, 0.88), rgba(12, 12, 14, 0.94));
+    border-right-color: rgba(63, 191, 127, 0.22);
+}
+
+body.traders-mode .sidebar-nav li:hover {
+    color: #9ff0c3;
+    background: rgba(63, 191, 127, 0.08);
+}
+
+body.traders-mode .sidebar-nav li.active {
+    color: #9ff0c3;
+    background: rgba(63, 191, 127, 0.14);
+    border-left-color: #3fbf7f;
+    text-shadow: 0 0 8px rgba(63, 191, 127, 0.35);
+}
+
+body.enterprise-mode .app-sidebar {
+    background: linear-gradient(180deg, rgba(38, 23, 10, 0.90), rgba(12, 12, 14, 0.94));
+    border-right-color: rgba(246, 215, 91, 0.18);
+}
+
+body.enterprise-mode .sidebar-nav li:hover {
+    color: #ffeaa7;
+    background: rgba(246, 215, 91, 0.08);
+}
+
+body.enterprise-mode .sidebar-nav li.active {
+    color: #ffeaa7;
+    background: rgba(246, 215, 91, 0.12);
+    border-left-color: #f6d75b;
+    text-shadow: 0 0 8px rgba(246, 215, 91, 0.30);
+}
+
 /* MAIN CONTENT */
 .app-content {
     flex: 1;
@@ -459,6 +739,47 @@ input:focus, select:focus {
 
 body.enterprise-mode .app-header {
     background: linear-gradient(135deg, rgba(12, 12, 14, 0.95), rgba(45, 22, 8, 0.95));
+}
+
+body.home-mode .app-sidebar {
+    display: block;
+    width: 280px;
+}
+
+body.home-mode .app-content {
+    padding: 30px;
+    flex: 1;
+}
+
+body.home-mode .business-nav-buttons {
+    display: none !important;
+}
+
+/* Home Mode Buttons Styling */
+.home-mode-buttons-container {
+    background: rgba(212, 175, 55, 0.08) !important;
+}
+
+.home-mode-btn {
+    transition: all 0.3s ease !important;
+}
+
+.home-mode-btn:hover {
+    background: rgba(255, 215, 0, 0.12) !important;
+    border-color: var(--gold) !important;
+    transform: translateX(4px);
+    text-shadow: 0 0 8px var(--gold-glow);
+}
+
+.home-service-btn {
+    transition: all 0.2s ease !important;
+}
+
+.home-service-btn:hover {
+    background: rgba(212, 175, 55, 0.1) !important;
+    color: var(--gold-light) !important;
+    border-color: var(--gold-light) !important;
+    transform: translateX(3px);
 }
 
 body.enterprise-mode .header-brand {
@@ -572,6 +893,67 @@ body.enterprise-mode #tab-farmers .panel-title {
     line-height: 1.6;
 }
 
+.mode-callout {
+    margin: 16px 0 8px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: rgba(212, 175, 55, 0.08);
+    color: var(--gold-light);
+    font-weight: 600;
+    line-height: 1.55;
+}
+
+.mode-action-btn {
+    position: relative;
+    overflow: hidden;
+    align-items: flex-start !important;
+    text-align: left;
+}
+
+.mode-action-subtext {
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: rgba(20, 14, 4, 0.85);
+    font-weight: 700;
+}
+
+body.traders-mode .welcome-panel {
+    border-left-color: #3fbf7f;
+    box-shadow: 0 10px 30px rgba(63, 191, 127, 0.12);
+}
+
+body.traders-mode .mode-callout {
+    background: rgba(63, 191, 127, 0.10);
+    border-color: rgba(63, 191, 127, 0.28);
+    color: #9ff0c3;
+}
+
+body.traders-mode .mode-action-btn {
+    background: linear-gradient(135deg, #d4af37 0%, #3fbf7f 100%);
+}
+
+body.enterprise-mode .welcome-panel {
+    border-left-color: #f6d75b;
+    box-shadow: 0 10px 30px rgba(246, 215, 91, 0.12);
+}
+
+body.enterprise-mode .mode-callout {
+    background: rgba(246, 215, 91, 0.10);
+    border-color: rgba(246, 215, 91, 0.28);
+    color: #ffeaa7;
+}
+
+body.enterprise-mode .mode-action-btn {
+    background: linear-gradient(135deg, #d4af37 0%, #a97724 100%);
+}
+
+.mode-action-btn.active {
+    outline: 3px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 4px;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.35);
+}
+
 .quick-actions {
     display: flex;
     gap: 12px;
@@ -588,10 +970,10 @@ body.enterprise-mode #tab-farmers .panel-title {
 
 .split-right {
     width: 100%;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     position: relative;
+    overflow: visible;
 }
 
 .farmer-directory-header {
@@ -856,9 +1238,8 @@ body.drawer-open::after {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    position: relative;
-    margin-bottom: 32px;
-    padding-top: 64px;
+    margin-bottom: 16px;
+    width: 100%;
 }
 
 #tab-farmers .panel-section-header > div:first-child {
@@ -878,53 +1259,59 @@ body.drawer-open::after {
 }
 
 .table-header-actions {
-    position: absolute;
-    top: 18px;
-    right: 24px;
     display: flex;
-    gap: 14px;
+    gap: 12px;
     align-items: center;
-    justify-content: flex-end;
-    width: auto;
-    min-width: 320px;
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow: visible;
 }
 
 #tab-farmers .table-header-actions .search-bar {
-    flex: 1 1 420px;
-    min-width: 260px;
-    max-width: 520px;
+    flex: 0 1 200px;
+    min-width: 130px;
 }
 
 #tab-farmers .table-header-actions .add-farmer-btn {
     flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 #tab-farmers.enterprise-mode .panel-section-header {
-    padding-top: 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 #tab-farmers.enterprise-mode .table-header-actions {
-    right: 24px;
-    justify-content: flex-end;
-    width: auto;
-    flex-wrap: wrap;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    flex-wrap: nowrap;
 }
 
 #tab-farmers.enterprise-mode .table-header-actions .search-bar {
-    flex: 1 1 420px;
-    min-width: 260px;
-    max-width: 520px;
-    width: auto;
+    flex: 0 1 350px;
+    min-width: 180px;
 }
 
 #tab-farmers.enterprise-mode .table-header-actions .gold-btn {
     white-space: nowrap;
 }
 
+#tab-farmers #season-filter {
+    flex: 0 0 100px;
+    min-width: 100px;
+    width: 100px;
+}
+
 .search-bar {
-    min-width: 260px;
-    max-width: 320px;
-    width: 100%;
+    display: flex;
+    align-items: center;
+    flex: 0 1 240px;
+    min-width: 140px;
+    width: auto;
 }
 
 .search-bar input {
@@ -1329,6 +1716,35 @@ body.drawer-open::after {
 
 .modal-content.medium-width {
     max-width: 640px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+#farmer-entry-modal {
+    align-items: flex-start;
+    overflow-y: auto;
+}
+
+#farmer-entry-modal .modal-content {
+    margin: 10px 0;
+}
+
+.farmer-entry-ocr-status {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    background: rgba(212, 175, 55, 0.08);
+    color: var(--gold-light);
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.farmer-entry-ocr-status.error {
+    border-color: rgba(231, 76, 60, 0.28);
+    background: rgba(231, 76, 60, 0.12);
+    color: #ffd8d3;
 }
 
 .tab-button {
@@ -2378,6 +2794,17 @@ body.drawer-open::after {
     }
 }
 
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -2415,6 +2842,36 @@ body.drawer-open::after {
  * 9. MOBILE RESPONSIVE MEDIA QUERIES
  * ============================================================= */
 @media (max-width: 1024px) {
+    .login-form-wrapper {
+        padding: 40px 50px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Login Layout - Stack on Mobile */
+    #login-container.login-split-layout {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        min-height: 100vh;
+    }
+    
+    .login-form-wrapper {
+        flex: 0;
+        padding: 40px 30px;
+        background: linear-gradient(135deg, rgba(12, 12, 14, 0.98), rgba(20, 15, 8, 0.95));
+    }
+    
+    .login-image-wrapper {
+        flex: 1;
+        border-left: none;
+        border-top: 2px solid var(--border-color);
+        padding: 20px;
+    }
+    
+    .login-card {
+        max-width: 100%;
+    }
     .kpi-grid {
         grid-template-columns: 1fr 1fr;
     }
@@ -2995,4 +3452,38 @@ body.drawer-open::after {
 .business-nav-buttons button:hover {
     transform: translateY(-4px);
     box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25);
+}
+
+.app-notice {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 3000;
+    max-width: 420px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.app-notice.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.app-notice.success {
+    background: rgba(27, 61, 39, 0.96);
+    border-color: rgba(46, 204, 113, 0.45);
+    color: #d9ffe8;
+}
+
+.app-notice.error {
+    background: rgba(70, 24, 24, 0.96);
+    border-color: rgba(231, 76, 60, 0.45);
+    color: #ffe3df;
 }

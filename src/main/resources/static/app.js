@@ -4,14 +4,17 @@ console.log('Sri Balaji app.js loaded');
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', verifyPwaVersion);
     document.addEventListener('DOMContentLoaded', initializeApp);
+    document.addEventListener('DOMContentLoaded', loadSavedSession);
 } else {
     verifyPwaVersion();
     initializeApp();
+    loadSavedSession();
 }
 
 window.addEventListener('load', () => {
     if (!window.appInitialized) {
         initializeApp();
+        loadSavedSession();
     }
 });
 
@@ -45,13 +48,23 @@ const API_BASE = '/api';
 const ACTIVE_TAB_KEY = 'balaji_active_tab';
 
 // Global Application State
-let sessionToken = localStorage.getItem('balaji_token') || null;
-let currentShopType = 'TRADERS'; // default: Sri Balaji Traders
+let sessionToken = null;  // START with no token - show login first
+let currentShopType = localStorage.getItem('balaji_shop_type') || 'TRADERS';
+let businessModeSelected = localStorage.getItem('balaji_mode_selected') === 'true';
 let selectedSeason = '';
 let activeFarmers = [];
 let selectedFarmerId = null;
 let selectedNotebookPages = [];
 let selectedFarmerIdForPhoto = null;
+
+// Load saved session after app init
+function loadSavedSession() {
+    const savedToken = localStorage.getItem('balaji_token');
+    if (savedToken) {
+        sessionToken = savedToken;
+        setupAuthView();
+    }
+}
 
 // Zoom scale for notebook reader
 let imgZoomScale = 1.0;
@@ -81,10 +94,46 @@ function registerServiceWorker() {
 
 // Auth View Setup
 function setupAuthView() {
+    console.log('setupAuthView called', {
+        sessionToken,
+        loginClasses: loginContainer?.className,
+        appClasses: appContainer?.className,
+        businessModeSelected
+    });
     if (sessionToken) {
         loginContainer.classList.remove('active');
+        loginContainer.style.display = 'none';
         appContainer.classList.add('active');
-        const savedTab = localStorage.getItem(ACTIVE_TAB_KEY) || 'tab-dashboard';
+        appContainer.style.display = 'flex';
+        document.body.classList.toggle('home-mode', !businessModeSelected);
+
+        const homeModeSection = document.getElementById('home-mode-section');
+        if (homeModeSection) {
+            homeModeSection.classList.toggle('visible', !businessModeSelected);
+        }
+
+        // keep central home buttons hidden when a sidebar home-mode selection is active
+        const centerBusinessNav = document.querySelector('.business-nav-buttons');
+        if (centerBusinessNav) {
+            centerBusinessNav.classList.toggle('hidden', !businessModeSelected);
+            centerBusinessNav.classList.toggle('visible', businessModeSelected);
+        }
+
+        // Update compact toggle active state
+        document.querySelectorAll('.compact-mode-btn').forEach(btn => btn.classList.remove('active'));
+        const compactBtn = document.getElementById(currentShopType === 'TRADERS' ? 'compact-traders-btn' : 'compact-enterprises-btn');
+        if (compactBtn) compactBtn.classList.add('active');
+
+        // update aria-pressed state
+            document.querySelectorAll('.compact-mode-btn').forEach(btn => {
+                btn.setAttribute('aria-pressed', 'false');
+            });
+        if (compactBtn) compactBtn.setAttribute('aria-pressed', 'true');
+
+        let savedTab = localStorage.getItem(ACTIVE_TAB_KEY) || 'tab-dashboard';
+        if (savedTab === 'tab-ledger') {
+            savedTab = 'tab-dashboard';
+        }
         if (document.getElementById(savedTab)) {
             switchTab(savedTab);
         } else {
@@ -108,25 +157,29 @@ function setupEventListeners() {
             e.preventDefault();
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
-            
+
             if (!usernameInput || !passwordInput) {
                 loginError.innerText = "Username and password are required.";
                 loginError.classList.remove('hide');
                 return;
             }
-            
+
             loginError.classList.add('hide');
 
             try {
                 console.log('Sending login request to /api/auth/login');
+                // Use form-encoded POST because the backend reliably accepts form params
+                const formBody = new URLSearchParams();
+                formBody.append('username', usernameInput.trim());
+                formBody.append('password', passwordInput.trim());
                 const response = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: usernameInput, password: passwordInput })
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formBody.toString()
                 });
 
                 console.log('Login response status:', response.status);
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Login successful:', data);
@@ -160,7 +213,7 @@ function setupEventListeners() {
         });
 
     // Shop Selector Dropdown Switch
-    shopSelector.addEventListener('change', (e) => {
+    shopSelector?.addEventListener('change', (e) => {
         currentShopType = e.target.value;
         updateShopLabels();
         selectedFarmerId = null; // Reset selection
@@ -168,18 +221,43 @@ function setupEventListeners() {
     });
 
     // Sidebar Tab Switching
-    document.querySelectorAll('.sidebar-nav li').forEach(item => {
+    document.querySelectorAll('.sidebar-nav li[data-tab]').forEach(item => {
         item.addEventListener('click', (e) => {
             const clickedItem = e.currentTarget;
             const tabId = clickedItem.getAttribute('data-tab');
             
             // Toggle active sidebar link
-            document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
+            document.querySelectorAll('.sidebar-nav li[data-tab]').forEach(li => li.classList.remove('active'));
             clickedItem.classList.add('active');
             
             // Toggle active tab panel
             switchTab(tabId);
         });
+    });
+
+    // Home landing mode buttons (defensive listeners)
+    document.querySelectorAll('.mode-action-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const businessMode = btn.getAttribute('data-business-mode');
+            if (businessMode === 'TRADERS' || businessMode === 'ENTERPRISES') {
+                try {
+                    selectBusinessMode(businessMode);
+                } catch (err) {
+                    console.error('Error selecting business mode via button listener', err);
+                }
+            }
+        });
+    });
+
+    // Accessible keyboard activation for compact mode buttons
+    document.querySelectorAll('.compact-mode-btn').forEach(btn => {
+        btn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                btn.click();
+            }
+        });
+        // ensure ARIA pressed toggles are managed in selectBusinessMode
     });
 
     // Modal close triggers
@@ -279,11 +357,10 @@ function setupEventListeners() {
     // Farmer entry modal handlers
         document.getElementById('farmer-entry-upload-form')?.addEventListener('submit', submitFarmerEntryUpload);
         document.getElementById('farmer-entry-manual-form')?.addEventListener('submit', submitFarmerEntryManual);
-        document.getElementById('farmer-entry-photo')?.addEventListener('change', (e) => {
-            const fileName = e.target.files[0] ? e.target.files[0].name : '';
-            const label = document.querySelector('#farmer-entry-upload-form .file-name');
-            if (label) label.innerText = fileName;
-        });
+        document.getElementById('farmer-entry-upload-form-drawer')?.addEventListener('submit', submitFarmerEntryUpload);
+        document.getElementById('farmer-entry-manual-form-drawer')?.addEventListener('submit', submitFarmerEntryManual);
+        document.getElementById('farmer-entry-photo')?.addEventListener('change', previewFarmerEntryImages);
+        document.getElementById('farmer-entry-photo-drawer')?.addEventListener('change', previewFarmerEntryImages);
 
     // Zoom listener for transcription page image
     const transImg = document.getElementById('transcription-image');
@@ -295,22 +372,18 @@ function setupEventListeners() {
 
 // Switch tabs dynamically
 function switchTab(tabId) {
+    const targetPanel = document.getElementById(tabId);
+    if (!targetPanel) {
+        console.warn(`Missing tab panel: ${tabId}. Falling back to dashboard.`);
+        tabId = 'tab-dashboard';
+    }
+
     localStorage.setItem(ACTIVE_TAB_KEY, tabId);
     document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
+    document.getElementById(tabId)?.classList.add('active');
     
     // Highlight correct sidebar nav item
-    document.querySelectorAll('.sidebar-nav li').forEach(li => {
-        if (li.getAttribute('data-tab') === tabId) {
-            li.classList.add('active');
-        } else {
-            li.classList.remove('active');
-        }
-    });
-
-    // Refresh contents based on active tab
-    if (tabId === 'tab-dashboard') loadDashboardData();
-    if (tabId === 'tab-stock') loadStockInventory();
+    document.querySelectorAll('.sidebar-nav li[data-tab]').forEach(li => {
     if (tabId === 'tab-farmers') loadFarmersDirectory();
     if (tabId === 'tab-ledger') loadLedgerSelector();
     if (tabId === 'tab-calculator') loadCalculatorSelector();
@@ -323,12 +396,19 @@ function updateShopLabels() {
     const isTraders = currentShopType === 'TRADERS';
     
     // 1. Header Titles
-    if (isTraders) {
-        shopTitleText.innerText = "శ్రీ బాలాజీ ట్రేడర్స్";
-        shopSubtitleText.innerText = "Sri Balaji Traders";
-    } else {
-        shopTitleText.innerText = "శ్రీ బాలాజీ ఎంటర్ప్రైజెస్";
-        shopSubtitleText.innerText = "Sri Balaji Enterprises";
+    if (shopTitleText) {
+        if (isTraders) {
+            shopTitleText.innerText = "శ్రీ బాలాజీ ట్రేడర్స్";
+        } else {
+            shopTitleText.innerText = "శ్రీ బాలాజీ ఎంటర్ప్రైజెస్";
+        }
+    }
+    if (shopSubtitleText) {
+        if (isTraders) {
+            shopSubtitleText.innerText = "Sri Balaji Traders";
+        } else {
+            shopSubtitleText.innerText = "Sri Balaji Enterprises";
+        }
     }
     
     activeShopLabels.forEach(lbl => {
@@ -338,6 +418,10 @@ function updateShopLabels() {
     // Add an enterprise-only styling flag for header and tab layout
     document.body.classList.toggle('enterprise-mode', !isTraders);
     document.body.classList.toggle('traders-mode', isTraders);
+
+    document.querySelectorAll('.mode-action-btn[data-business-mode]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.businessMode === currentShopType);
+    });
 
     // 2. Sidebar Navigation Items (Always visible for multi-directory access)
     const navStock = document.getElementById('nav-stock');
@@ -401,6 +485,22 @@ function updateShopLabels() {
     if (farmerCropLabel) {
         farmerCropLabel.innerText = isTraders ? "Items Supplied / Company Name" : "Crop Details";
     }
+    const manualNameLabels = document.querySelectorAll('label[for="manual-farmer-name"], label[for="manual-farmer-name-drawer"]');
+    manualNameLabels.forEach(lbl => {
+        lbl.innerText = isTraders ? "Trader/Supplier Name" : "Farmer Name (English)";
+    });
+    const manualLocalNameLabels = document.querySelectorAll('label[for="manual-farmer-name-te"], label[for="manual-farmer-name-drawer-te"]');
+    manualLocalNameLabels.forEach(lbl => {
+        lbl.innerText = isTraders ? "Trader Name (తెలుగు)" : "Farmer Name (తెలుగు)";
+    });
+    const manualVillageLabels = document.querySelectorAll('label[for="manual-farmer-village"], label[for="manual-farmer-village-drawer"]');
+    manualVillageLabels.forEach(lbl => {
+        lbl.innerText = isTraders ? "City / Location" : "Village";
+    });
+    const manualCropLabels = document.querySelectorAll('label[for="manual-farmer-crop"], label[for="manual-farmer-crop-drawer"]');
+    manualCropLabels.forEach(lbl => {
+        lbl.innerText = isTraders ? "Items Supplied / Company Name" : "Crop Details";
+    });
 
     // Right details panel placeholders
     const detailPlaceholderP = document.querySelector('#detail-placeholder .detail-placeholder-message p');
@@ -462,18 +562,22 @@ function updateShopLabels() {
     // Ledger Summary Box renaming & hiding
     const summaryBoxAdvances = document.getElementById('summary-box-advances');
     const summaryBoxInterest = document.getElementById('summary-box-interest');
+    const sumBillsEl = document.getElementById('summary-title-bills');
+    const sumPaymentsEl = document.getElementById('summary-title-payments');
+    const sumBalanceEl = document.getElementById('summary-title-balance');
+
     if (isTraders) {
         if (summaryBoxAdvances) summaryBoxAdvances.style.display = 'none';
         if (summaryBoxInterest) summaryBoxInterest.style.display = 'none';
-        document.getElementById('summary-title-bills').innerText = "Total Purchases Owed";
-        document.getElementById('summary-title-payments').innerText = "Total Payments Made";
-        document.getElementById('summary-title-balance').innerText = "Total Outstanding Amount Owed";
+        if (sumBillsEl) sumBillsEl.innerText = "Total Purchases Owed";
+        if (sumPaymentsEl) sumPaymentsEl.innerText = "Total Payments Made";
+        if (sumBalanceEl) sumBalanceEl.innerText = "Total Outstanding Amount Owed";
     } else {
         if (summaryBoxAdvances) summaryBoxAdvances.style.display = 'block';
         if (summaryBoxInterest) summaryBoxInterest.style.display = 'block';
-        document.getElementById('summary-title-bills').innerText = "Total Bills";
-        document.getElementById('summary-title-payments').innerText = "Total Payments Received";
-        document.getElementById('summary-title-balance').innerText = "Total Outstanding Balance Due";
+        if (sumBillsEl) sumBillsEl.innerText = "Total Bills";
+        if (sumPaymentsEl) sumPaymentsEl.innerText = "Total Payments Received";
+        if (sumBalanceEl) sumBalanceEl.innerText = "Total Outstanding Balance Due";
     }
 
     // Ledger Table Column Headers
@@ -508,6 +612,52 @@ function updateShopLabels() {
 function onAppLoad() {
     updateShopLabels();
     loadDashboardData();
+}
+
+function selectBusinessMode(mode) {
+    if (mode !== 'TRADERS' && mode !== 'ENTERPRISES') {
+        console.warn('Unknown business mode:', mode);
+        return;
+    }
+    currentShopType = mode;
+    businessModeSelected = true;
+    localStorage.setItem('balaji_shop_type', mode);
+    localStorage.setItem('balaji_mode_selected', 'true');
+    document.body.classList.remove('home-mode');
+    
+    const homeModeSection = document.getElementById('home-mode-section');
+    if (homeModeSection) {
+        homeModeSection.classList.remove('visible');
+    }
+    // Hide central buttons when a business mode is selected
+    const centerBusinessNav = document.querySelector('.business-nav-buttons');
+    if (centerBusinessNav) {
+        centerBusinessNav.classList.remove('visible');
+        centerBusinessNav.classList.add('hidden');
+    }
+    
+    // Update compact toggle aria state and active styling when selecting mode programmatically
+    document.querySelectorAll('.compact-mode-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+    });
+    const compactBtn = document.getElementById(mode === 'TRADERS' ? 'compact-traders-btn' : 'compact-enterprises-btn');
+    if (compactBtn) {
+        compactBtn.classList.add('active');
+        compactBtn.setAttribute('aria-pressed', 'true');
+    }
+    
+    updateShopLabels();
+    switchTab('tab-dashboard');
+}
+
+// Exposed logout function for inline onclick fallback
+function doLogout() {
+    sessionToken = null;
+    businessModeSelected = false;
+    localStorage.removeItem('balaji_token');
+    localStorage.removeItem('balaji_mode_selected');
+    setupAuthView();
 }
 
 // 1. DASHBOARD CONTROLLER
@@ -1419,13 +1569,17 @@ async function loadLedgerSelector(targetFarmerId = null) {
 }
 
 function openFarmerLedgerTab(farmerId) {
-    document.querySelectorAll('.sidebar-nav li').forEach(li => {
-        if (li.getAttribute('data-tab') === 'tab-ledger') li.classList.add('active');
-        else li.classList.remove('active');
-    });
-
-    switchTab('tab-ledger');
-    loadLedgerSelector(farmerId);
+    selectedFarmerId = parseInt(farmerId, 10) || selectedFarmerId;
+    if (!selectedFarmerId) {
+        alert('Please select a farmer before opening the ledger.');
+        return;
+    }
+    const farmer = activeFarmers.find(f => f.id === selectedFarmerId);
+    if (farmer) {
+        const modalTitle = document.getElementById('tx-modal-title');
+        if (modalTitle) modalTitle.innerText = `Log Transaction for ${farmer.name}`;
+    }
+    toggleModal('transaction-modal', true);
 }
 
 async function loadFarmerLedger(farmerId) {
@@ -1494,9 +1648,14 @@ async function loadFarmerLedger(farmerId) {
 
 async function saveLedgerTransaction(e) {
     e.preventDefault();
-    const farmerId = document.getElementById('ledger-farmer-selector').value;
+    const selectorValue = document.getElementById('ledger-farmer-selector')?.value;
+    const farmerId = selectorValue || selectedFarmerId;
+    if (!farmerId) {
+        alert('Please select a farmer account before submitting a transaction.');
+        return;
+    }
     const txData = {
-        farmerId: parseInt(farmerId),
+        farmerId: parseInt(farmerId, 10),
         type: document.getElementById('tx-type').value,
         amount: parseFloat(document.getElementById('tx-amount').value),
         date: document.getElementById('tx-date').value,
@@ -1982,76 +2141,126 @@ function switchFarmerEntryTab(tab) {
     }
 }
 
-async function submitFarmerEntryUpload(event) {
-    event.preventDefault();
-    const fileInput = document.getElementById('farmer-entry-photo') || document.getElementById('farmer-entry-photo-drawer');
-    const file = fileInput ? fileInput.files[0] : null;
-    if (!file) {
-        alert('Please select an image to upload.');
+function previewFarmerEntryImages(event) {
+    const fileInput = event.target;
+    const files = Array.from(fileInput.files || []);
+    const previewSection = document.getElementById('farmer-entry-pages-preview');
+    const thumbnails = document.getElementById('farmer-entry-thumbnails');
+    const fileNameLabel = fileInput.closest('form')?.querySelector('.file-name');
+
+    if (fileNameLabel) {
+        fileNameLabel.innerText = files.length === 0 ? '' : `${files.length} file(s) selected`;
+    }
+
+    if (!previewSection || !thumbnails) return;
+    if (files.length === 0) {
+        previewSection.style.display = 'none';
+        thumbnails.innerHTML = '';
         return;
     }
 
-    // Use the existing OCR simulation to register a farmer from the page image
-    const names = ['M. Venkateswarlu', 'T. Narayana Rao', 'P. Krishna Murthy', 'G. Sita Ramaiah'];
-    const villages = ['Bapatla', 'Tenali', 'Mangalagiri', 'Chebrolu'];
-    const crops = ['Cotton - 4 Acres', 'Paddy - 6 Acres', 'Chilli - 2 Acres', 'Turmeric - 3 Acres'];
-    const randomName = names[Math.floor(Math.random() * names.length)];
-    const randomVillage = villages[Math.floor(Math.random() * villages.length)];
-    const randomCrop = crops[Math.floor(Math.random() * crops.length)];
-    const randomPhone = '9' + Math.floor(100000000 + Math.random() * 900000000);
+    thumbnails.innerHTML = '';
+    files.forEach(file => {
+        const card = document.createElement('div');
+        card.className = 'thumbnail-preview';
+        card.innerHTML = `<div class="thumb-name">${file.name}</div>`;
+        thumbnails.appendChild(card);
+    });
+    previewSection.style.display = 'block';
+}
 
-    const data = {
-        name: randomName,
-        phone: randomPhone,
-        village: randomVillage,
-        cropDetails: randomCrop,
-        season: '2025-26',
-        shopType: currentShopType
-    };
+async function submitFarmerEntryUpload(event) {
+    event.preventDefault();
+    const fileInput = document.getElementById('farmer-entry-photo') || document.getElementById('farmer-entry-photo-drawer');
+    const files = fileInput ? Array.from(fileInput.files) : [];
+    if (files.length === 0) {
+        alert('Please select one or more images to upload.');
+        return;
+    }
+
+    const names = ['M. Venkateswarlu', 'T. Narayana Rao', 'P. Krishna Murthy', 'G. Sita Ramaiah', 'S. Lakshmi', 'K. Anil Kumar'];
+    const villages = ['Bapatla', 'Tenali', 'Mangalagiri', 'Chebrolu', 'Nuzvid', 'Sattenapalle'];
+    const crops = ['Cotton - 4 Acres', 'Paddy - 6 Acres', 'Chilli - 2 Acres', 'Turmeric - 3 Acres', 'Maize - 3 Acres', 'Sunflower - 2 Acres'];
+    const createdProfiles = [];
 
     try {
-        const res = await fetch(`${API_BASE}/farmers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
+        for (const file of files) {
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            const randomVillage = villages[Math.floor(Math.random() * villages.length)];
+            const randomCrop = crops[Math.floor(Math.random() * crops.length)];
+            const randomPhone = '9' + Math.floor(100000000 + Math.random() * 900000000);
 
-        if (res.ok) {
-            const saved = await res.json();
-            // close drawer if present
-            if (document.getElementById('farmer-entry-drawer') && !document.getElementById('farmer-entry-modal').classList.contains('open')) {
-                toggleDrawer('farmer-entry-drawer', false);
-            } else {
-                toggleModal('farmer-entry-modal', false);
+            const data = {
+                name: randomName,
+                phone: randomPhone,
+                village: randomVillage,
+                cropDetails: randomCrop,
+                season: '2025-26',
+                shopType: currentShopType
+            };
+
+            const res = await fetch(`${API_BASE}/farmers`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                const farmer = saved?.farmer || saved;
+                createdProfiles.push(farmer);
             }
-            if (fileInput) fileInput.value = '';
-            const formFileName = document.querySelector('#farmer-entry-upload-form .file-name') || document.querySelector('#farmer-entry-upload-form-drawer .file-name');
-            if (formFileName) formFileName.innerText = '';
-            loadFarmersDirectory();
-            selectFarmerInView(saved.id);
-        } else {
-            alert('Unable to register farmer from the uploaded page.');
         }
+
+        if (createdProfiles.length === 0) {
+            alert('Unable to register any farmers from the uploaded pages.');
+            return;
+        }
+
+        const drawerOpen = document.getElementById('farmer-entry-drawer') && !document.getElementById('farmer-entry-drawer').classList.contains('hide');
+        if (drawerOpen) {
+            toggleDrawer('farmer-entry-drawer', false);
+        } else {
+            toggleModal('farmer-entry-modal', false);
+        }
+
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        const formFileName = document.querySelector('#farmer-entry-upload-form .file-name') || document.querySelector('#farmer-entry-upload-form-drawer .file-name');
+        if (formFileName) formFileName.innerText = '';
+        const previewSection = document.getElementById('farmer-entry-pages-preview');
+        const thumbnails = document.getElementById('farmer-entry-thumbnails');
+        if (previewSection) previewSection.style.display = 'none';
+        if (thumbnails) thumbnails.innerHTML = '';
+
+        loadFarmersDirectory();
+        selectFarmerInView(createdProfiles[createdProfiles.length - 1].id);
+        alert(`Successfully registered ${createdProfiles.length} farmer(s).`);
     } catch (err) {
         console.error('Error registering farmer from page upload', err);
         alert('Upload failed. Please try again.');
     }
 }
 
-async function submitFarmerEntryManual(event) {
-    event.preventDefault();
-    const name = document.getElementById('manual-farmer-name').value.trim();
-    const phone = document.getElementById('manual-farmer-phone').value.trim();
-    const village = document.getElementById('manual-farmer-village').value.trim();
-    const cropDetails = document.getElementById('manual-farmer-crop').value.trim();
-    const season = document.getElementById('manual-farmer-season').value;
+async function submitFarmerEntryManual(event, closeAfterSave = false) {
+    if (event && event.preventDefault) {
+        event.preventDefault();
+    }
+
+    const form = event?.target?.closest('form') || document.getElementById('farmer-entry-manual-form') || document.getElementById('farmer-entry-manual-form-drawer');
+    const name = form?.querySelector('#manual-farmer-name, #manual-farmer-name-drawer')?.value.trim() || '';
+    const nameLocal = form?.querySelector('#manual-farmer-name-te, #manual-farmer-name-drawer-te')?.value.trim() || '';
+    const phone = form?.querySelector('#manual-farmer-phone, #manual-farmer-phone-drawer')?.value.trim() || '';
+    const village = form?.querySelector('#manual-farmer-village, #manual-farmer-village-drawer')?.value.trim() || '';
+    const cropDetails = form?.querySelector('#manual-farmer-crop, #manual-farmer-crop-drawer')?.value.trim() || '';
+    const season = form?.querySelector('#manual-farmer-season, #manual-farmer-season-drawer')?.value || '2025-26';
 
     if (!name || !phone || !village || !cropDetails) {
         alert('Please fill in all required fields.');
         return;
     }
 
-    const data = { name, phone, village, cropDetails, season, shopType: currentShopType };
+    const data = { name, nameLocal, phone, village, cropDetails, season, shopType: currentShopType };
     try {
         const res = await fetch(`${API_BASE}/farmers`, {
             method: 'POST',
@@ -2060,16 +2269,27 @@ async function submitFarmerEntryManual(event) {
         });
         if (res.ok) {
             const saved = await res.json();
-            // close drawer if used
-            if (document.getElementById('farmer-entry-drawer') && !document.getElementById('farmer-entry-modal').classList.contains('open')) {
-                toggleDrawer('farmer-entry-drawer', false);
-            } else {
-                toggleModal('farmer-entry-modal', false);
-            }
-            const manualForm = document.getElementById('farmer-entry-manual-form') || document.getElementById('farmer-entry-manual-form-drawer');
-            if (manualForm) manualForm.reset();
+            const farmer = saved?.farmer || saved;
             loadFarmersDirectory();
-            selectFarmerInView(saved.id);
+            selectFarmerInView(farmer.id);
+            if (closeAfterSave) {
+                const drawerOpen = document.getElementById('farmer-entry-drawer') && !document.getElementById('farmer-entry-drawer').classList.contains('hide');
+                if (drawerOpen) {
+                    toggleDrawer('farmer-entry-drawer', false);
+                } else {
+                    toggleModal('farmer-entry-modal', false);
+                }
+            }
+            if (form) {
+                form.reset();
+                const firstInput = form.querySelector('input[type="text"]');
+                if (!closeAfterSave && firstInput) {
+                    firstInput.focus();
+                }
+            }
+            if (!closeAfterSave) {
+                alert('Farmer added. You can add another farmer now.');
+            }
         } else {
             alert('Failed to add farmer manually.');
         }
