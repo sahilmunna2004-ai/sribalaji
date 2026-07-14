@@ -1,11 +1,12 @@
 package com.balaji.traders.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import java.time.LocalDate;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Column;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notebook_pages")
@@ -14,10 +15,22 @@ public class NotebookPage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @Column(name = "farmer_id", nullable = false)
     private Long farmerId;
+    
+    @Column(name = "image_path", nullable = false, columnDefinition = "TEXT")
     private String imagePath;
-    private LocalDate uploadDate;
+
+    @Column(name = "image_hash", length = 128)
+    private String imageHash;
+    
+    @Column(name = "upload_date")
+    private LocalDateTime uploadDate = LocalDateTime.now();
+    
+    @Column(columnDefinition = "TEXT")
     private String notes;
+    
+    @Column(name = "year", length = 20)
     private String year;
 
     // Default Constructor
@@ -33,8 +46,11 @@ public class NotebookPage {
     public String getImagePath() { return imagePath; }
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 
-    public LocalDate getUploadDate() { return uploadDate; }
-    public void setUploadDate(LocalDate uploadDate) { this.uploadDate = uploadDate; }
+    public String getImageHash() { return imageHash; }
+    public void setImageHash(String imageHash) { this.imageHash = imageHash; }
+
+    public LocalDateTime getUploadDate() { return uploadDate; }
+    public void setUploadDate(LocalDateTime uploadDate) { this.uploadDate = uploadDate; }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }

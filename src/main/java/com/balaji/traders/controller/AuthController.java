@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -50,8 +50,11 @@ public class AuthController {
             }
         }
         
+        String normalizedUsername = username == null ? null : username.trim();
+        String normalizedPassword = password == null ? null : password.trim();
+
         Map<String, Object> response = new HashMap<>();
-        if (adminUsername.equals(username) && adminPassword.equals(password)) {
+        if (adminUsername.equals(normalizedUsername) && adminPassword.equals(normalizedPassword)) {
             response.put("success", true);
             response.put("message", "Login successful");
             response.put("token", "balaji-session-token-mock");

@@ -1,0 +1,1 @@
+Removing farmer-management-app folder as requested by user. Files deleted by automated patch.

@@ -1,72 +1,89 @@
-CREATE TABLE farmers (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255),
-    phone VARCHAR(255),
-    village VARCHAR(255),
-    crop_details VARCHAR(255),
-    photo_path VARCHAR(255),
-    shop_type VARCHAR(255)
+-- Create farmers table
+CREATE TABLE IF NOT EXISTS farmers (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(20),
+    village VARCHAR(255) NOT NULL,
+    crop_details VARCHAR(500),
+    photo_path TEXT,
+    shop_type VARCHAR(50),
+    season VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE notebook_pages (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    farmer_id BIGINT,
-    image_path VARCHAR(255),
-    upload_date DATE,
-    notes CLOB,
-    CONSTRAINT fk_notebook_farmer FOREIGN KEY (farmer_id) REFERENCES farmers(id)
+-- Create index on farmer name for faster searches
+CREATE INDEX IF NOT EXISTS idx_farmers_name ON farmers(name);
+CREATE INDEX IF NOT EXISTS idx_farmers_village ON farmers(village);
+CREATE INDEX IF NOT EXISTS idx_farmers_season ON farmers(season);
+
+-- Create notebook_pages table for storing multiple images per farmer
+CREATE TABLE IF NOT EXISTS notebook_pages (
+    id BIGSERIAL PRIMARY KEY,
+    farmer_id BIGINT NOT NULL REFERENCES farmers(id) ON DELETE CASCADE,
+    image_path TEXT NOT NULL,
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    year VARCHAR(20)
 );
 
-CREATE TABLE stock (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    item_name VARCHAR(255),
-    quantity INTEGER,
-    price_per_unit DOUBLE,
+-- Create index on farmer_id for efficient lookups
+CREATE INDEX IF NOT EXISTS idx_notebook_pages_farmer_id ON notebook_pages(farmer_id);
+CREATE INDEX IF NOT EXISTS idx_notebook_pages_year ON notebook_pages(year);
+
+-- Create transactions table
+CREATE TABLE IF NOT EXISTS transactions (
+    id BIGSERIAL PRIMARY KEY,
+    farmer_id BIGINT NOT NULL REFERENCES farmers(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    type VARCHAR(50),
+    amount DECIMAL(10, 2),
+    description TEXT,
+    interest_applied BOOLEAN DEFAULT FALSE,
+    interest_rate DECIMAL(5, 2) DEFAULT 0.0,
+    shop_type VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for transaction queries
+CREATE INDEX IF NOT EXISTS idx_transactions_farmer_id ON transactions(farmer_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
+CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type);
+CREATE INDEX IF NOT EXISTS idx_transactions_shop_type ON transactions(shop_type);
+
+-- Create stock table
+CREATE TABLE IF NOT EXISTS stock (
+    id BIGSERIAL PRIMARY KEY,
+    item_name VARCHAR(255) NOT NULL,
+    quantity INTEGER NOT NULL,
+    price_per_unit DECIMAL(10, 2),
     supplier_name VARCHAR(255),
-    bill_number VARCHAR(255),
-    date DATE,
-    is_returned BOOLEAN,
-    shop_type VARCHAR(255)
+    bill_number VARCHAR(100),
+    date DATE NOT NULL,
+    is_returned BOOLEAN DEFAULT FALSE,
+    shop_type VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE transactions (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    farmer_id BIGINT,
-    date DATE,
-    type VARCHAR(255),
-    amount DOUBLE,
-    description VARCHAR(255),
-    interest_applied BOOLEAN,
-    interest_rate DOUBLE,
-    shop_type VARCHAR(255),
-    CONSTRAINT fk_transaction_farmer FOREIGN KEY (farmer_id) REFERENCES farmers(id)
+-- Create indexes for stock queries
+CREATE INDEX IF NOT EXISTS idx_stock_item_name ON stock(item_name);
+CREATE INDEX IF NOT EXISTS idx_stock_date ON stock(date);
+CREATE INDEX IF NOT EXISTS idx_stock_supplier_name ON stock(supplier_name);
+CREATE INDEX IF NOT EXISTS idx_stock_shop_type ON stock(shop_type);
+
+-- Create image metadata table for tracking image storage
+CREATE TABLE IF NOT EXISTS image_metadata (
+    id BIGSERIAL PRIMARY KEY,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id BIGINT NOT NULL,
+    image_path TEXT NOT NULL,
+    file_name VARCHAR(255),
+    file_size BIGINT,
+    mime_type VARCHAR(50),
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-MERGE INTO farmers (id, name, phone, village, crop_details, shop_type) KEY(id) VALUES
-(1, 'A. Bhadrayya', '9908913521', 'Repalle', 'Paddy - 5 Acres', 'ENTERPRISES'),
-(2, 'Kali Somayya', '9866091953', 'Veyaluru', 'Chilli - 3 Acres', 'ENTERPRISES'),
-(3, 'Sri Srinivasa Agri Traders', '9848011223', 'Vijayawada', 'Seeds & Fertilizer Wholesale', 'TRADERS'),
-(4, 'Guntur Chilli Merchants Association', '9440188990', 'Guntur', 'Chilli Trading & Brokerage', 'TRADERS');
-
-MERGE INTO transactions (id, farmer_id, date, type, amount, description, interest_applied, interest_rate, shop_type) KEY(id) VALUES
-(1, 1, '2025-06-11', 'ADVANCE', 4500.0, 'Opening balance (16)', false, 0.0, 'ENTERPRISES'),
-(2, 1, '2025-06-27', 'BILL', 1800.0, 'Anuc (2 bags)', false, 0.0, 'ENTERPRISES'),
-(3, 1, '2025-07-01', 'BILL', 7000.0, '20-20 fertilizer (5 bags)', false, 0.0, 'ENTERPRISES'),
-(4, 1, '2025-07-04', 'BILL', 900.0, '5-10-10 seeds (1 bag)', false, 0.0, 'ENTERPRISES'),
-(5, 1, '2025-07-07', 'ADVANCE', 10000.0, 'Cash loan', false, 0.0, 'ENTERPRISES'),
-(6, 1, '2025-08-01', 'BILL', 1400.0, 'Urea fertilizer (3 bags)', false, 0.0, 'ENTERPRISES'),
-(7, 1, '2025-08-11', 'BILL', 2800.0, '20-20 fertilizer (2 bags)', false, 0.0, 'ENTERPRISES'),
-(8, 2, '2025-06-23', 'ADVANCE', 7250.0, 'Opening balance (83)', false, 0.0, 'ENTERPRISES'),
-(9, 2, '2025-06-29', 'BILL', 2700.0, 'Seeds purchase (126)', false, 0.0, 'ENTERPRISES'),
-(10, 2, '2025-07-02', 'BILL', 4200.0, '20-20 fertilizer (3 bags)', false, 0.0, 'ENTERPRISES'),
-(11, 2, '2025-07-11', 'ADVANCE', 3000.0, 'Cash advance loan', false, 0.0, 'ENTERPRISES'),
-(12, 2, '2025-07-15', 'BILL', 1400.0, 'Paddy seeds (1 bag)', false, 0.0, 'ENTERPRISES'),
-(13, 2, '2025-07-19', 'BILL', 7000.0, '20-20 fertilizer (5 bags)', false, 0.0, 'ENTERPRISES'),
-(14, 2, '2025-07-27', 'BILL', 1400.0, 'Urea (5 bags)', false, 0.0, 'ENTERPRISES'),
-(15, 3, '2025-06-10', 'BILL', 120000.0, 'Wholesale Paddy Seeds Purchase (100 bags)', false, 0.0, 'TRADERS'),
-(16, 3, '2025-06-15', 'PAYMENT', 100000.0, 'Part payment via Bank Transfer', false, 0.0, 'TRADERS'),
-(17, 3, '2025-07-05', 'BILL', 80000.0, 'Cotton Seeds Purchase (50 bags)', false, 0.0, 'TRADERS'),
-(18, 4, '2025-06-18', 'BILL', 150000.0, 'Urea Fertilizer Purchase (200 bags)', false, 0.0, 'TRADERS'),
-(19, 4, '2025-06-25', 'PAYMENT', 150000.0, 'Full settlement payment', false, 0.0, 'TRADERS'),
-(20, 4, '2025-07-12', 'BILL', 210000.0, '20-20 Fertilizer Purchase (150 bags)', false, 0.0, 'TRADERS'),
-(21, 4, '2025-07-20', 'PAYMENT', 100000.0, 'Cash advance payment', false, 0.0, 'TRADERS');
+-- Create index for image metadata queries
+CREATE INDEX IF NOT EXISTS idx_image_metadata_entity ON image_metadata(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_image_metadata_path ON image_metadata(image_path);

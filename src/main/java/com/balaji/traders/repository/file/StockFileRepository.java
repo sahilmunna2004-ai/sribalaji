@@ -1,7 +1,7 @@
 package com.balaji.traders.repository.file;
 
 import com.balaji.traders.model.Stock;
-import tools.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;

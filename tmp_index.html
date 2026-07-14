@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri Balaji Traders & Enterprises</title>
+    <!-- Google Fonts for premium typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=10">
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#d4af37">
+    <link rel="apple-touch-icon" href="assets/venkateswara.jpg">
+</head>
+<body>
+    <!-- Background Swamy Image with Dark Overlay -->
+    <div class="divine-bg"></div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-container" class="page-container active login-split-layout">
+        <!-- LEFT SIDE: Login Form -->
+        <div class="login-form-wrapper">
+            <div class="login-card">
+                <div class="login-header">
+                    <i class="fa-solid fa-om divine-icon"></i>
+                    <h1>శ్రీ బాలాజీ ఎంటర్‌ప్రైజెస్ & ట్రేడర్స్</h1>
+                    <p>Sri Balaji Enterprises & Traders</p>
+                </div>
+                
+                <form id="login-form" method="post" onsubmit="return false;">
+                    <div class="input-group">
+                        <label for="username"><i class="fa-solid fa-user"></i> Username</label>
+                        <input type="text" id="username" name="username" required autocomplete="username" placeholder="Enter username">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+                        <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter password">
+                    </div>
+                    
+                    <div id="login-error" class="error-msg hide">
+                        <i class="fa-solid fa-circle-exclamation"></i> Invalid username or password.
+                    </div>
+                    
+                    <button type="submit" class="gold-btn btn-block">
+                        <span>ENTER SYSTEM</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- RIGHT SIDE: Divine Image -->
+        <div class="login-image-wrapper">
+            <div class="login-divine-image">
+                <img src="assets/venkateswara.jpg" alt="Lord Venkateswara" class="deity-image">
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APPLICATION CONTAINER -->
+    <div id="app-container" class="page-container">
+        
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-brand" onclick="switchTab('tab-dashboard'); document.querySelectorAll('.sidebar-nav li').forEach(li => { if(li.getAttribute('data-tab')==='tab-dashboard') li.classList.add('active'); else li.classList.remove('active'); })" style="cursor: pointer;" title="Go to Dashboard (Home)">
+                <i class="fa-solid fa-om brand-icon"></i>
+                <div class="brand-titles">
+                    <h1 id="shop-title-text">శ్రీ బాలాజీ ట్రేడర్స్</h1>
+                    <p id="shop-subtitle-text">Sri Balaji Traders</p>
+                    <p class="property-owner">K Devender | Mobile: 9949496392</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Current business label only; selection happens from home buttons -->
+                <div class="active-business-labels">
+                    <span class="active-shop-label">Sri Balaji Traders</span>
+                </div>
+
+                <!-- Back Navigation -->
+                <button id="back-btn" class="header-icon-btn" title="Go Back" style="display:none;" onclick="goBack()">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <!-- Home Navigation -->
+                <button id="home-btn" class="header-icon-btn" title="Go to Home" onclick="switchTab('tab-dashboard')">
+                    <i class="fa-solid fa-home"></i>
+                </button>
+                <!-- Language Switcher -->
+                <select id="language-selector" class="gold-select" style="padding: 6px 8px; font-size: 0.85rem;" onchange="switchLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="te">తెలుగు</option>
+                </select>
+                <!-- Translator Button -->
+                <button id="translator-btn" class="header-icon-btn" title="English-Telugu Translator" onclick="toggleModal('translator-modal', true)">
+                    <i class="fa-solid fa-language"></i>
+                </button>
+                <!-- Profile Action -->
+                <button id="profile-btn" class="header-icon-btn" title="View Profile">
+                    <i class="fa-solid fa-user-tie"></i>
+                </button>
+                <!-- Logout Action -->
+                <button id="logout-btn" class="header-icon-btn logout" title="Sign Out" onclick="doLogout()">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- PROFILE MODAL -->
+        <div id="profile-modal" class="modal hide">
+            <div class="modal-content profile-content">
+                <span class="close-modal">&times;</span>
+                <h3><i class="fa-solid fa-user-circle"></i> Owner Profile Details</h3>
+                <div class="profile-details">
+                    <p><strong>Name:</strong> Venkateswara Rao (Father's Profile)</p>
+                    <p><strong>Primary Phone:</strong> +91 98480 22338</p>
+                    <p><strong>Alternative Phone:</strong> +91 94401 55662</p>
+                    <p><strong>Business Address:</strong> Shop No. 4, Agricultural Market Yard, Guntur, AP</p>
+                </div>
+                <div class="profile-divine-note">
+                    <i class="fa-solid fa-quote-left"></i>
+                    <span>May Lord Venkateswara Swamy bless our business with prosperity.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRANSLATOR MODAL -->
+        <div id="translator-modal" class="modal hide">
+            <div class="modal-content" style="max-width: 600px;">
+                <span class="close-modal" onclick="toggleModal('translator-modal', false)">&times;</span>
+                <h3><i class="fa-solid fa-language"></i> English ↔ Telugu Translator</h3>
+                <form id="translator-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div>
+                        <label for="translator-input">English Text</label>
+                        <textarea id="translator-input" class="gold-input" placeholder="Type English text here..." style="min-height: 100px; padding: 10px; font-size: 0.95rem; resize: vertical;"></textarea>
+                    </div>
+                    <div>
+                        <button type="button" class="gold-btn btn-block" onclick="translateText()">
+                            <i class="fa-solid fa-arrow-right-arrow-left"></i> Translate to Telugu
+                        </button>
+                    </div>
+                    <div>
+                        <label for="translator-output">Telugu Output</label>
+                        <textarea id="translator-output" class="gold-input" placeholder="Telugu translation will appear here..." style="min-height: 100px; padding: 10px; font-size: 0.95rem; resize: vertical;" readonly></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="gold-btn" onclick="copyToClipboard()" style="flex: 1;">
+                            <i class="fa-solid fa-copy"></i> Copy Output
+                        </button>
+                        <button type="button" class="gold-btn" onclick="swapTranslation()" style="flex: 1;">
+                            <i class="fa-solid fa-repeat"></i> Swap
+                        </button>
+                        <button type="button" class="gold-btn-outline" onclick="clearTranslator()" style="flex: 1;">
+                            <i class="fa-solid fa-eraser"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="app-body">
+            <!-- SIDEBAR NAVIGATION -->
+            <aside class="app-sidebar">
+                <nav class="sidebar-nav">
+                    <ul>
+                        <!-- HOME MODE: Show 5 Mode Selection Buttons in Sidebar -->
+                        <li id="home-mode-section" style="display: none; margin-bottom: 30px; padding: 0; list-style: none;">
+                            <div class="compact-mode-toggle" style="padding: 12px 12px; display:flex; gap:8px; justify-content:center;">
+                                <button onclick="selectBusinessMode('TRADERS')" data-business-mode="TRADERS" id="compact-traders-btn" class="compact-mode-btn" title="Traders" aria-label="Open Traders mode" role="button" tabindex="0" aria-pressed="false">
+                                    <i class="fa-solid fa-store" aria-hidden="true"></i>
+                                </button>
+                                <button onclick="selectBusinessMode('ENTERPRISES')" data-business-mode="ENTERPRISES" id="compact-enterprises-btn" class="compact-mode-btn" title="Enterprises" aria-label="Open Enterprises mode" role="button" tabindex="0" aria-pressed="false">
+                                    <i class="fa-solid fa-building" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div class="sidebar-deity" style="padding: 10px 15px; text-align:center;">
+                                <img src="assets/venkateswara.jpg" alt="Deity" class="sidebar-deity-img" />
+                            </div>
+                            <div class="home-mode-buttons-container" style="padding: 20px 15px; border-bottom: 2px solid var(--gold); background: rgba(212, 175, 55, 0.08);" data-animate>
+                                <p style="font-size: 0.75rem; color: var(--gold); margin: 0 0 15px 0; text-transform: uppercase; font-weight: 700; letter-spacing: 1.2px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Select Mode</p>
+                                
+                                <button onclick="selectBusinessMode('TRADERS')" class="home-mode-btn" style="width: 100%; text-align: left; padding: 14px 16px; margin-bottom: 10px; border: 2px solid var(--gold-light); background: rgba(255, 215, 0, 0.05); color: var(--gold-light); cursor: pointer; border-radius: 8px; font-size: 0.95rem; transition: all 0.3s; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+                                    <i class="fa-solid fa-store" style="font-size: 1.2rem;"></i>
+                                    <span>Traders Mode</span>
+                                </button>
+                                
+                                <button onclick="selectBusinessMode('ENTERPRISES')" class="home-mode-btn" style="width: 100%; text-align: left; padding: 14px 16px; border: 2px solid var(--gold-light); background: rgba(255, 215, 0, 0.05); color: var(--gold-light); cursor: pointer; border-radius: 8px; font-size: 0.95rem; transition: all 0.3s; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+                                    <i class="fa-solid fa-building" style="font-size: 1.2rem;"></i>
+                                    <span>Enterprises Mode</span>
+                                </button>
+                            </div>
+                            
+                            <div style="padding: 20px 15px; border-bottom: 2px solid rgba(212, 175, 55, 0.3);">
+                                <p style="font-size: 0.75rem; color: var(--gold); margin: 0 0 15px 0; text-transform: uppercase; font-weight: 700; letter-spacing: 1.2px;"><i class="fa-solid fa-briefcase"></i> Other Services</p>
+                                
+                                <button onclick="switchTab('tab-money')" class="home-service-btn" style="width: 100%; text-align: left; padding: 12px 16px; margin-bottom: 10px; border: 1px solid rgba(212, 175, 55, 0.4); background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fa-solid fa-wallet" style="width: 18px; text-align: center;"></i>
+                                    <span>Money Management</span>
+                                </button>
+                                
+                                <button onclick="switchTab('tab-policies')" class="home-service-btn" style="width: 100%; text-align: left; padding: 12px 16px; margin-bottom: 10px; border: 1px solid rgba(212, 175, 55, 0.4); background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fa-solid fa-file-contract" style="width: 18px; text-align: center;"></i>
+                                    <span>Family Policies</span>
+                                </button>
+                                
+                                <button onclick="switchTab('tab-chitfund')" class="home-service-btn" style="width: 100%; text-align: left; padding: 12px 16px; border: 1px solid rgba(212, 175, 55, 0.4); background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fa-solid fa-piggy-bank" style="width: 18px; text-align: center;"></i>
+                                    <span>Family Chitfund</span>
+                                </button>
+                            </div>
+                        </li>
+
+                        <li class="active" data-tab="tab-dashboard" id="nav-dashboard">\n                            <i class="fa-solid fa-chart-line"></i> <span>Dashboard</span>\n                        </li>\n                        <li data-tab="tab-farmers" id="nav-farmers">\n                            <i class="fa-solid fa-users"></i> <span>Farmers Directory</span>\n                        </li>
+                        <li data-tab="tab-calculator" id="nav-calculator">
+                            <i class="fa-solid fa-calculator"></i> <span>Interest Calculator</span>
+                        </li>
+                        <li data-tab="tab-traders" id="nav-traders">
+                            <i class="fa-solid fa-handshake"></i> <span>Traders Directory</span>
+                        </li>
+                        <li data-tab="tab-traders-ledger" id="nav-traders-ledger">
+                            <i class="fa-solid fa-file-invoice-dollar"></i> <span>Trader Ledger</span>
+                        </li>
+                        <li data-tab="tab-stock" id="nav-stock">
+                            <i class="fa-solid fa-boxes-stacked"></i> <span>Goods & Stock</span>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- MAIN CONTENT PANELS -->
+            <main class="app-content">
+                
+                <!-- 1. DASHBOARD TAB -->
+                <section id="tab-dashboard" class="tab-panel active">
+                    <h2 class="panel-title" id="dashboard-title">Business Overview</h2>
+                    <p class="panel-desc" id="dashboard-subtitle">Summary of the current business workflow, stock movement, and outstanding balances.</p>
+                    
+                    <!-- KPI Cards -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon"><i class="fa-solid fa-users-viewfinder"></i></div>
+                            <div class="kpi-info">
+                                <h3 id="kpi-primary-label">Total Farmers</h3>
+                                <p id="kpi-farmers-count">0</p>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon"><i class="fa-solid fa-box-open"></i></div>
+                            <div class="kpi-info">
+                                <h3 id="kpi-stock-label">Total Inventory Items</h3>
+                                <p id="kpi-stock-count">0</p>
+                            </div>
+                        </div>
+                        <div class="kpi-card danger">
+                            <div class="kpi-icon"><i class="fa-solid fa-scale-unbalanced-off"></i></div>
+                            <div class="kpi-info">
+                                <h3 id="kpi-balance-label">Outstanding Dues</h3>
+                                <p id="kpi-outstanding-dues">₹0.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Welcome details -->
+                    <div class="glass-card welcome-panel">
+                        <h2 id="welcome-title">శ్రీ బాలాజీ ఎంటర్‌ప్రైజెస్ నిర్వహణ ప్యానెల్ కు స్వాగతం</h2>
+                        <p id="welcome-description">మా వద్ద అన్ని రకాల నాణ్యమైన విత్తనాలు (Seeds) మరియు ఎరువులు (Fertilizers) లభించును.</p>
+                        <div class="mode-callout" id="mode-callout">Use this mode to manage farmer accounts, advances, notebook pages, and input sales collections.</div>
+                        
+                        <div class="business-nav-buttons mt-4" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                            <button onclick="selectBusinessMode('TRADERS')" data-business-mode="TRADERS" class="gold-btn btn-lg mode-action-btn" style="flex: 1; min-width: 240px; padding: 25px; font-size: 1.2rem; display: flex; flex-direction: column; align-items: center; gap: 10px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">
+                                <i class="fa-solid fa-store" style="font-size: 2.5rem;"></i>
+                                <span style="font-weight: 800; font-family: 'Cinzel', serif;">Sri Balaji Traders</span>
+                                <small class="mode-action-subtext">Open Traders mode with current trader workflows.</small>
+                            </button>
+                            <button onclick="selectBusinessMode('ENTERPRISES')" data-business-mode="ENTERPRISES" class="gold-btn btn-lg mode-action-btn" style="flex: 1; min-width: 240px; padding: 25px; font-size: 1.2rem; display: flex; flex-direction: column; align-items: center; gap: 10px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">
+                                <i class="fa-solid fa-building" style="font-size: 2.5rem;"></i>
+                                <span style="font-weight: 800; font-family: 'Cinzel', serif;">Sri Balaji Enterprises</span>
+                                <small class="mode-action-subtext">Open Enterprises mode with existing farmer workflows.</small>
+                            </button>
+                            <button onclick="switchTab('tab-money')" class="gold-btn btn-lg mode-action-btn" style="flex: 1; min-width: 240px; padding: 25px; font-size: 1.2rem; display: flex; flex-direction: column; align-items: center; gap: 10px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">
+                                <i class="fa-solid fa-wallet" style="font-size: 2.5rem;"></i>
+                                <span style="font-weight: 800; font-family: 'Cinzel', serif;">Money Management</span>
+                                <small class="mode-action-subtext">Manage loans, advances, and payment tracking.</small>
+                            </button>
+                            <button onclick="switchTab('tab-policies')" class="gold-btn btn-lg mode-action-btn" style="flex: 1; min-width: 240px; padding: 25px; font-size: 1.2rem; display: flex; flex-direction: column; align-items: center; gap: 10px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">
+                                <i class="fa-solid fa-file-contract" style="font-size: 2.5rem;"></i>
+                                <span style="font-weight: 800; font-family: 'Cinzel', serif;">Family Policies</span>
+                                <small class="mode-action-subtext">Manage family policy plans and member records.</small>
+                            </button>
+                            <button onclick="switchTab('tab-chitfund')" class="gold-btn btn-lg mode-action-btn" style="flex: 1; min-width: 240px; padding: 25px; font-size: 1.2rem; display: flex; flex-direction: column; align-items: center; gap: 10px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">
+                                <i class="fa-solid fa-money-bill-transfer" style="font-size: 2.5rem;"></i>
+                                <span style="font-weight: 800; font-family: 'Cinzel', serif;">Family Chitfund</span>
+                                <small class="mode-action-subtext">Track chitfund contributions and payout schedules.</small>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                <section id="tab-money" class="tab-panel">
+                    <div class="panel-header-flex">
+                        <div>
+                            <h2 class="panel-title">Money Management</h2>
+                            <p class="panel-desc">Track people who take money, maintain loan records, and view repayment summaries.</p>
+                        </div>
+                        <button class="gold-btn" onclick="switchTab('tab-dashboard')"><i class="fa-solid fa-home"></i> Back to Home</button>
+                    </div>
+                    <div class="glass-card">
+                        <p>This section will help you manage borrowers, advances, and repayments.</p>
+                        <p>For now, use the existing ledger and transaction flows under the selected business mode.</p>
+                    </div>
+                </section>
+                <section id="tab-policies" class="tab-panel">
+                    <div class="panel-header-flex">
+                        <div>
+                            <h2 class="panel-title">Family Policies</h2>
+                            <p class="panel-desc">Policy records and family member coverage details will be managed here.</p>
+                        </div>
+                        <button class="gold-btn" onclick="switchTab('tab-dashboard')"><i class="fa-solid fa-home"></i> Back to Home</button>
+                    </div>
+                    <div class="glass-card">
+                        <p>Family Policies is a planned workspace for Life Insurance, Savings Plans, and family member protection.</p>
+                        <p>The current system still maintains enterprise and trader data as before.</p>
+                    </div>
+                </section>
+                <section id="tab-chitfund" class="tab-panel">
+                    <div class="panel-header-flex">
+                        <div>
+                            <h2 class="panel-title">Family Chitfund</h2>
+                            <p class="panel-desc">Manage chitfund groups, instalment schedules, and contributions.</p>
+                        </div>
+                        <button class="gold-btn" onclick="switchTab('tab-dashboard')"><i class="fa-solid fa-home"></i> Back to Home</button>
+                    </div>
+                    <div class="glass-card">
+                        <p>Family Chitfund will be expanded into a dedicated circular finance module.</p>
+                        <p>For now, all existing business routes remain unchanged.</p>
+                    </div>
+                </section>    
+
+
+                <!-- 2. GOODS & STOCK TAB -->
+                <section id="tab-stock" class="tab-panel">
+                    <div class="panel-header-flex">
+                        <h2 class="panel-title" id="stock-panel-title">Goods & Stock Inventory</h2>
+                        <button class="gold-btn" id="stock-panel-action" onclick="toggleModal('stock-modal', true)"><i class="fa-solid fa-plus"></i> Log Purchase Bill</button>
+                    </div>
+
+                    <!-- Stock Purchase Form Modal -->
+                    <div id="stock-modal" class="modal hide">
+                        <div class="modal-content">
+                            <span class="close-modal" onclick="toggleModal('stock-modal', false)">&times;</span>
+                            <h3><i class="fa-solid fa-cart-flatbed"></i> Log Goods Purchase</h3>
+                            <form id="stock-form">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="stock-item-name">Item Name</label>
+                                        <input type="text" id="stock-item-name" placeholder="e.g. Paddy Seeds, Urea" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stock-quantity">Quantity (Bags/Units)</label>
+                                        <input type="number" id="stock-quantity" min="1" placeholder="e.g. 50" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stock-unit-price">Price Per Unit (₹)</label>
+                                        <input type="number" step="0.01" id="stock-unit-price" placeholder="e.g. 1200" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stock-supplier">Supplier Name</label>
+                                        <input type="text" id="stock-supplier" placeholder="e.g. Balaji Seeds Corp" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stock-bill-number">Bill Number</label>
+                                        <input type="text" id="stock-bill-number" placeholder="e.g. BILL-9901" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stock-date">Purchase Date</label>
+                                        <input type="date" id="stock-date" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="gold-btn btn-block mt-3">Log Purchase</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Stock Inventory Table -->
+                    <div class="glass-card mt-3">
+                        <div class="table-responsive">
+                            <table class="data-table" id="stock-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Item Name</th>
+                                        <th>Supplier Name</th>
+                                        <th>Bill No.</th>
+                                        <th>Quantity</th>
+                                        <th>Price/Unit</th>
+                                        <th>Total Value</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dynamic rows loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. FARMERS DIRECTORY TAB (REDESIGNED SPLIT LAYOUT) -->
+                <section id="tab-farmers" class="tab-panel">
+
+                    <div class="split-view-container">
+                        <div class="split-right glass-card" id="farmer-detail-view">
+                            <div class="panel-section-header table-header-row">
+                                <div>
+                                    <h3><i class="fa-solid fa-users"></i> Registered Farmers List</h3>
+                                    <p>Select a farmer from the list to view details, upload notebook pages, or manage ledger entries.</p>
+                                </div>
+                                <div class="table-header-actions" id="farmers-table-toolbar">
+                                    <div class="search-bar" style="display:flex; align-items:center; gap:8px;">
+                                        <input type="text" id="farmer-search-input" placeholder="🔍 Search farmer by name/village..." />
+                                        <button id="farmer-search-voice" class="header-icon-btn" title="Voice search (Telugu)" type="button" onclick="startVoiceSearch('farmer-search-input')"><i class="fa-solid fa-microphone"></i></button>
+                                    </div>
+                                    <select id="season-filter" class="gold-select">
+                                        <option value="">All Years</option>
+                                        <option value="2023-24">2023-24</option>
+                                        <option value="2024-25">2024-25</option>
+                                        <option value="2025-26">2025-26</option>
+                                        <option value="2026-27">2026-27</option>
+                                    </select>
+                                    <button class="gold-btn btn-sm add-farmer-btn" onclick="openFarmerEntryModal()" title="Add Farmer">
+                                        <i class="fa-solid fa-user-plus"></i> Add Farmer
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="farmers-list-tools">
+                                <div class="directory-metric-badge compact">
+                                    <div class="directory-badge-icon">
+                                        <i class="fa-solid fa-seedling"></i>
+                                    </div>
+                                    <div class="directory-badge-text">
+                                        <span>Total Farmers</span>
+                                        <strong id="farmers-count-badge">0</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="farmers-list-wrapper mt-2">
+                                <div class="table-responsive">
+                                    <table class="farmers-list-table" id="farmers-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Farmer</th>
+                                                <th>Phone</th>
+                                                <th>Season</th>
+                                                <th>Crop / Notes</th>
+                                                <th>Amt Taken</th>
+                                                <th>Interest</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="farmers-list">
+                                            <!-- Dynamic rows loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div id="detail-placeholder" style="width: 100%;">
+                                <div class="detail-placeholder-message">
+                                    <i class="fa-solid fa-users-viewfinder"></i>
+                                    <p>Select a farmer from the directory to view profile details, manage profile photos, and digitize handwritten notebooks.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="farmer-detail-content hide" id="detail-main-content">
+                                <div class="detail-summary-row" style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+                                    <div class="summary-box small" style="flex:1; background: rgba(12,12,14,0.6); border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                                        <div style="font-size:0.78rem; color:var(--text-muted);">Amount Taken</div>
+                                        <div id="detail-amount-taken" style="font-size:1.2rem; font-weight:800; color:var(--gold-light);">₹ 0</div>
+                                    </div>
+                                    <div class="summary-box small" style="flex:1; background: rgba(12,12,14,0.6); border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                                        <div style="font-size:0.78rem; color:var(--text-muted);">Interest Accrued</div>
+                                        <div id="detail-interest-accrued" style="font-size:1.2rem; font-weight:800; color:var(--gold-light);">₹ 0</div>
+                                    </div>
+                                </div>
+                                <div class="detail-profile-header">
+                                    <div class="profile-avatar-large" id="detail-profile-avatar" onclick="triggerProfilePhotoEdit()">
+                                        <!-- Avatar Image dynamic -->
+                                    </div>
+                                    <div class="profile-info-block">
+                                        <h2 id="detail-farmer-name">Farmer Name</h2>
+                                        <p id="detail-farmer-location"><i class="fa-solid fa-location-dot"></i> Village Name</p>
+                                        <div class="profile-actions-inline" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                                            <button class="gold-btn-outline btn-sm" id="detail-back-btn" onclick="clearFarmerSelection()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                                            <button class="gold-btn-outline btn-sm" id="detail-edit-btn" onclick="openEditFarmerFormInline()"><i class="fa-solid fa-edit"></i> Edit</button>
+                                            <button class="gold-btn-outline btn-sm" id="detail-interest-btn" onclick="openProfileInterestModal()"><i class="fa-solid fa-percent"></i> Interest</button>
+                                            <button class="gold-btn btn-sm" id="detail-ledger-btn"><i class="fa-solid fa-file-invoice-dollar"></i> Ledger</button>
+                                            <button class="gold-btn-danger btn-sm" id="detail-delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="profile-details-grid mt-3">
+                                    <div class="detail-box">
+                                        <strong>Phone Number:</strong>
+                                        <span id="detail-farmer-phone">-</span>
+                                    </div>
+                                    <div class="detail-box">
+                                        <strong id="detail-crop-label">Crop details:</strong>
+                                        <span id="detail-farmer-crop">-</span>
+                                    </div>
+                                    <div class="detail-box">
+                                        <strong>Season:</strong>
+                                        <span id="detail-farmer-season">-</span>
+                                    </div>
+                                </div>
+
+                                <div class="farmer-purchases-section mt-3">
+                                    <h4 style="color: var(--gold-light); font-family: 'Cinzel', serif; font-size: 0.95rem; margin-bottom: 8px;"><i class="fa-solid fa-basket-shopping"></i> Associated Stock & Purchases</h4>
+                                    <div class="table-responsive" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+                                        <table class="data-table small" id="farmer-items-table" style="margin: 0; font-size: 0.8rem;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Stock Item</th>
+                                                    <th>Amount</th>
+                                                    <th>Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Dynamic rows populated from BILL transactions -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <hr class="gold-hr">
+
+                                <div class="notebook-section">
+                                    <div class="section-title-flex">
+                                        <h3><i class="fa-solid fa-book-open"></i> Paper Notebook Digitizer</h3>
+                                        <button class="gold-btn-outline btn-sm" onclick="toggleModal('notebook-upload-modal', true)"><i class="fa-solid fa-upload"></i> Upload Notebook Page</button>
+                                    </div>
+                                    <p class="section-subtitle">Upload pages of handwritten accounts notebooks. Click on any page to transcribe the data manually into the ledger.</p>
+                                    <div class="notebook-gallery mt-2" id="notebook-gallery-grid">
+                                        <!-- Dynamic notebook page thumbnails -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="farmer-detail-form-content hide" id="detail-form-content" style="padding: 10px;">
+                                <h3 id="inline-form-title" style="font-family: 'Cinzel', serif; color: var(--gold-light); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;"><i class="fa-solid fa-user-plus"></i> Add Farmer Profile</h3>
+                                <form id="inline-farmer-form" onsubmit="saveInlineFarmer(event)">
+                                    <input type="hidden" id="inline-farmer-id">
+                                    <div class="form-group mt-2">
+                                        <label for="inline-farmer-name">Farmer Name (English)</label>
+                                        <input type="text" id="inline-farmer-name" placeholder="Enter full name" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-farmer-name-te">Farmer Name (తెలుగు)</label>
+                                        <input type="text" id="inline-farmer-name-te" placeholder="పేరు నమోదు చేయండి">
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-farmer-phone">Phone Number</label>
+                                        <input type="tel" id="inline-farmer-phone" placeholder="Enter 10-digit number" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-farmer-village">Village Name</label>
+                                        <input type="text" id="inline-farmer-village" placeholder="Enter village" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-farmer-season">Season</label>
+                                        <select id="inline-farmer-season" class="gold-select" required>
+                                            <option value="2023-24">2023-24</option>
+                                            <option value="2024-25">2024-25</option>
+                                            <option value="2025-26" selected>2025-26</option>
+                                            <option value="2026-27">2026-27</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-actions mt-4" style="display: flex; gap: 10px;">
+                                        <button type="submit" class="gold-btn" style="flex: 1;">Save Profile</button>
+                                        <button type="button" class="gold-btn-outline" onclick="cancelInlineForm()">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Farmer Detail View Modal -->
+                    <div id="farmer-detail-modal" class="modal hide">
+                        <div class="modal-content" style="max-width:720px;">
+                            <span class="close-modal" onclick="toggleModal('farmer-detail-modal', false)">&times;</span>
+                            <!-- Financial Summary -->
+                            <div style="display:flex; gap:12px; margin-bottom:16px;">
+                                <div style="flex:1; background:rgba(12,12,14,0.6); border:1px solid var(--border-color); padding:12px; border-radius:8px; text-align:center;">
+                                    <div style="font-size:0.78rem; color:var(--text-muted);">Amount Taken</div>
+                                    <div id="modal-detail-amount" style="font-size:1.25rem; font-weight:800; color:var(--gold-light);">₹ 0.00</div>
+                                </div>
+                                <div style="flex:1; background:rgba(12,12,14,0.6); border:1px solid var(--border-color); padding:12px; border-radius:8px; text-align:center;">
+                                    <div style="font-size:0.78rem; color:var(--text-muted);">Interest Accrued</div>
+                                    <div id="modal-detail-interest" style="font-size:1.25rem; font-weight:800; color:var(--gold-light);">₹ 0.00</div>
+                                </div>
+                            </div>
+                            <!-- Profile header -->
+                            <div class="detail-profile-header">
+                                <div class="profile-avatar-large" id="modal-detail-avatar">
+                                    <i class="fa-solid fa-user-circle"></i>
+                                </div>
+                                <div class="profile-info-block">
+                                    <h2 id="modal-detail-name" style="font-family:'Cinzel',serif; color:var(--gold-light);">Farmer Name</h2>
+                                    <p id="modal-detail-location" style="color:var(--text-muted); margin:4px 0 12px;"><i class="fa-solid fa-location-dot"></i> Village</p>
+                                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                        <button class="gold-btn-outline btn-sm" id="modal-edit-btn"><i class="fa-solid fa-edit"></i> Edit</button>
+                                        <button class="gold-btn btn-sm" id="modal-ledger-btn"><i class="fa-solid fa-file-invoice-dollar"></i> Ledger</button>
+                                        <button class="gold-btn-danger btn-sm" id="modal-delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Detail grid -->
+                            <div class="profile-details-grid mt-3">
+                                <div class="detail-box">
+                                    <strong>Phone Number:</strong>
+                                    <span id="modal-detail-phone">-</span>
+                                </div>
+                                <div class="detail-box">
+                                    <strong id="modal-detail-crop-label">Crop Details:</strong>
+                                    <span id="modal-detail-crop">-</span>
+                                </div>
+                                <div class="detail-box">
+                                    <strong>Season:</strong>
+                                    <span id="modal-detail-season">-</span>
+                                </div>
+                                <div class="detail-box">
+                                    <strong>Status:</strong>
+                                    <span id="modal-detail-status" class="status-pill">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete Farmer Confirmation Modal -->
+                    <div id="delete-farmer-modal" class="modal hide">
+                        <div class="modal-content modal-danger">
+                            <span class="close-modal" onclick="toggleModal('delete-farmer-modal', false)">&times;</span>
+                            <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <h3>Confirm Delete</h3>
+                            <p id="delete-farmer-message">Are you sure you want to delete this farmer?</p>
+                            <div class="modal-actions" style="display:flex; gap:12px; justify-content:center; margin-top:20px;">
+                                <button class="gold-btn-danger" id="confirm-delete-farmer-btn">Delete Forever</button>
+                                <button class="gold-btn-outline" onclick="toggleModal('delete-farmer-modal', false)">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generic Confirmation Modal -->
+                    <div id="confirm-modal" class="modal hide">
+                        <div class="modal-content modal-danger">
+                            <span class="close-modal" onclick="toggleModal('confirm-modal', false)">&times;</span>
+                            <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <h3>Confirm Action</h3>
+                            <p id="confirm-modal-message">Are you sure?</p>
+                            <div class="modal-actions" style="display:flex; gap:12px; justify-content:center; margin-top:20px;">
+                                <button class="gold-btn-danger" id="confirm-modal-btn">Confirm</button>
+                                <button class="gold-btn-outline" id="confirm-modal-cancel-btn">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Farmer Entry Modal -->
+                    <div id="farmer-entry-modal" class="modal hide">
+                        <div class="modal-content medium-width">
+                            <span class="close-modal" onclick="toggleModal('farmer-entry-modal', false)">&times;</span>
+                            <div class="modal-heading" style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+                                <div>
+                                    <h3 style="margin:0; font-size:1.25rem;"><i class="fa-solid fa-user-plus"></i> Add Farmer / Upload Page</h3>
+                                    <p style="margin:0.5rem 0 0; color: var(--text-muted); font-size:0.88rem;">Choose whether to upload a handwritten page or add farmer details manually.</p>
+                                </div>
+                                <div class="entry-tab-buttons" style="display:flex; gap:8px;">
+                                    <button type="button" class="tab-button active" onclick="switchFarmerEntryTab('upload')">Upload Image</button>
+                                    <button type="button" class="tab-button" onclick="switchFarmerEntryTab('manual')">Add Manually</button>
+                                </div>
+                            </div>
+
+                            <div id="farmer-entry-upload-panel" class="modal-section">
+                                <form id="farmer-entry-upload-form">
+                                    <div class="form-group">
+                                        <label for="farmer-entry-photo">Upload farmer notebook images <span style="color: var(--text-muted); font-size: 0.9rem;">(One per farmer)</span></label>
+                                        <input type="file" id="farmer-entry-photo" accept="image/*" class="gold-input" required multiple onchange="previewFarmerEntryImages(event)">
+                                        <span class="file-name"></span>
+                                    </div>
+                                    <div id="farmer-entry-pages-preview" style="display:none; margin: 12px 0;">
+                                        <p style="font-size: 0.9rem; font-weight: 600; color: var(--gold-light); margin-bottom: 8px;">👥 Selected Farmers:</p>
+                                        <div id="farmer-entry-thumbnails" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-bottom: 12px;"></div>
+                                        <p style="font-size:0.8rem; color:var(--text-muted);">Each uploaded page will become one farmer. OCR will try to auto-fill the details below for each image.</p>
+                                    </div>
+                                    <div id="farmer-entry-review-form" style="display:none;">
+                                        <p style="font-size:0.85rem; color:var(--gold-light); font-weight:600; margin-bottom:12px;">📋 Each image = 1 farmer. OCR will fill what it can, then the pages will upload directly as farmers.</p>
+                                        <div id="farmer-entry-ocr-status" class="farmer-entry-ocr-status" style="display:none;"></div>
+                                        <div id="farmer-entry-review-cards" style="display:grid; gap:14px;"></div>
+                                    </div>
+                                    <div id="farmer-entry-upload-btn-wrap">
+                                        <button type="submit" class="gold-btn btn-block"><i class="fa-solid fa-upload"></i> Scan & Create Farmers</button>
+                                    </div>
+                                    <p style="font-size:0.82rem; color: var(--text-muted); margin-top: 10px;">Upload multiple images. Each image will be created directly as a farmer record after OCR completes.</p>
+                                </form>
+                            </div>
+                            <div id="farmer-entry-manual-panel" class="modal-section hide">
+                                <form id="farmer-entry-manual-form">
+                                    <div class="form-group">
+                                        <label for="manual-farmer-name">Farmer Name (English)</label>
+                                        <input type="text" id="manual-farmer-name" class="gold-input" placeholder="Enter full name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-name-te">Farmer Name (తెలుగు)</label>
+                                        <input type="text" id="manual-farmer-name-te" class="gold-input" placeholder="పేరు నమోదు చేయండి">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-phone">Phone Number</label>
+                                        <input type="tel" id="manual-farmer-phone" class="gold-input" placeholder="Enter 10-digit number" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-village">Village</label>
+                                        <input type="text" id="manual-farmer-village" class="gold-input" placeholder="Enter village" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-crop">Crop Details</label>
+                                        <input type="text" id="manual-farmer-crop" class="gold-input" placeholder="Enter crop details or notes" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-season">Season</label>
+                                        <select id="manual-farmer-season" class="gold-select" required>
+                                            <option value="2023-24">2023-24</option>
+                                            <option value="2024-25">2024-25</option>
+                                            <option value="2025-26" selected>2025-26</option>
+                                            <option value="2026-27">2026-27</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="display:grid; gap:10px;">
+                                        <button type="submit" class="gold-btn btn-block"><i class="fa-solid fa-save"></i> Add Another Farmer</button>
+                                        <button type="button" class="gold-btn-outline btn-block" onclick="submitFarmerEntryManual(event, true)"><i class="fa-solid fa-check"></i> Add & Close</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right-side Farmer Entry Drawer (rich panel) -->
+                    <div id="farmer-entry-drawer" class="side-drawer hide" aria-hidden="true">
+                        <div class="side-drawer-content">
+                            <button class="close-drawer" onclick="toggleDrawer('farmer-entry-drawer', false)">×</button>
+                            <div class="modal-heading" style="margin-bottom:12px;">
+                                <h3 style="margin:0; font-size:1.1rem;"><i class="fa-solid fa-user-plus"></i> Add Farmer / Upload Page</h3>
+                                <p style="margin:6px 0 0; color:var(--text-muted); font-size:0.85rem;">Quick add via image or manual entry from the right panel.</p>
+                            </div>
+
+                            <div class="entry-tab-buttons" style="display:flex; gap:8px; margin-bottom:10px;">
+                                <button type="button" class="tab-button active" onclick="switchFarmerEntryTab('upload')">Upload Image</button>
+                                <button type="button" class="tab-button" onclick="switchFarmerEntryTab('manual')">Add Manually</button>
+                            </div>
+
+                            <div id="farmer-entry-upload-panel-drawer" class="modal-section">
+                                <form id="farmer-entry-upload-form-drawer">
+                                    <div class="form-group">
+                                        <label for="farmer-entry-photo-drawer">Upload handwritten farmer page(s)</label>
+                                        <input type="file" id="farmer-entry-photo-drawer" accept="image/*" class="gold-input" required multiple onchange="previewFarmerEntryImages(event)">
+                                        <span class="file-name"></span>
+                                    </div>
+                                    <p style="font-size:0.82rem; color: var(--text-muted); margin-top: 10px;">You can upload multiple pages - all will be saved together for this farmer.</p>
+                                    <div class="form-group">
+                                        <button type="submit" class="gold-btn btn-block"><i class="fa-solid fa-upload"></i> Upload & Register Farmer</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div id="farmer-entry-manual-panel-drawer" class="modal-section hide">
+                                <form id="farmer-entry-manual-form-drawer">
+                                    <div class="form-group">
+                                        <label for="manual-farmer-name-drawer">Farmer Name (English)</label>
+                                        <input type="text" id="manual-farmer-name-drawer" class="gold-input" placeholder="Enter full name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-name-drawer-te">Farmer Name (తెలుగు)</label>
+                                        <input type="text" id="manual-farmer-name-drawer-te" class="gold-input" placeholder="పేరు నమోదు చేయండి">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-phone-drawer">Phone Number</label>
+                                        <input type="tel" id="manual-farmer-phone-drawer" class="gold-input" placeholder="Enter 10-digit number" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-village-drawer">Village</label>
+                                        <input type="text" id="manual-farmer-village-drawer" class="gold-input" placeholder="Enter village" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-crop-drawer">Crop Details</label>
+                                        <input type="text" id="manual-farmer-crop-drawer" class="gold-input" placeholder="Enter crop details or notes" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="manual-farmer-season-drawer">Season</label>
+                                        <select id="manual-farmer-season-drawer" class="gold-select" required>
+                                            <option value="2023-24">2023-24</option>
+                                            <option value="2024-25">2024-25</option>
+                                            <option value="2025-26" selected>2025-26</option>
+                                            <option value="2026-27">2026-27</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="display:grid; gap:10px;">
+                                        <button type="submit" class="gold-btn btn-block"><i class="fa-solid fa-save"></i> Add Another Farmer</button>
+                                        <button type="button" class="gold-btn-outline btn-block" onclick="submitFarmerEntryManual(event, true)"><i class="fa-solid fa-check"></i> Add & Close</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Photo Modal (uploader/deleter) -->
+                    <div id="profile-photo-modal" class="modal hide">
+                        <div class="modal-content text-center">
+                            <span class="close-modal" onclick="toggleModal('profile-photo-modal', false)">&times;</span>
+                            <h3><i class="fa-solid fa-image"></i> Farmer Profile Picture</h3>
+                            
+                            <div class="photo-viewer-container">
+                                <img id="profile-photo-viewer-img" src="" alt="Profile Photo" class="profile-detail-img hide">
+                                <div id="profile-photo-placeholder" class="large-avatar">
+                                    <i class="fa-solid fa-user-circle"></i>
+                                    <p>No profile picture uploaded</p>
+                                </div>
+                            </div>
+
+                            <form id="profile-photo-upload-form" class="mt-3">
+                                <div class="file-upload-wrapper">
+                                    <label for="profile-photo-input" class="gold-btn-outline btn-block">
+                                        <i class="fa-solid fa-upload"></i> Choose Photo
+                                    </label>
+                                    <input type="file" id="profile-photo-input" accept="image/*" class="hide">
+                                    <span id="profile-photo-selected-filename" class="d-block mt-1"></span>
+                                </div>
+                                <button type="submit" class="gold-btn mt-2"><i class="fa-solid fa-save"></i> Upload & Save</button>
+                            </form>
+
+                            <button id="profile-delete-photo-btn" class="gold-btn-danger mt-3 hide"><i class="fa-solid fa-trash"></i> Delete Photo</button>
+                        </div>
+                    </div>
+
+                    <!-- Notebook Page Upload Modal -->
+                    <div id="notebook-upload-modal" class="modal hide">
+                        <div class="modal-content">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 12px;">
+                                <h3 style="margin:0; font-size:1.15rem;"><i class="fa-solid fa-upload"></i> Upload Notebook Page</h3>
+                                <div style="display:flex; gap:8px;">
+                                    <button class="gold-btn-outline btn-sm" type="button" onclick="switchTab('tab-farmers'); toggleModal('notebook-upload-modal', false)"><i class="fa-solid fa-house"></i> Home</button>
+                                    <button class="gold-btn-outline btn-sm" type="button" onclick="toggleModal('notebook-upload-modal', false)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                                </div>
+                            </div>
+                            <form id="notebook-upload-form">
+                                <div class="form-group">
+                                    <label for="notebook-year">Select Year / Season</label>
+                                    <select id="notebook-year" class="gold-select" required>
+                                        <option value="" disabled selected>Select year</option>
+                                        <option value="2023-24">2023-24</option>
+                                        <option value="2024-25">2024-25</option>
+                                        <option value="2025-26">2025-26</option>
+                                        <option value="2026-27">2026-27</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notebook-notes">Page Description / Notes</label>
+                                    <input type="text" id="notebook-notes" placeholder="e.g. Page 12 - Kharif season advances" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Select Page Image (Handwritten Sheet)</label>
+                                    <div class="file-upload-wrapper">
+                                        <label for="notebook-file-input" class="gold-btn-outline btn-block">
+                                            <i class="fa-solid fa-camera"></i> Select Image / Capture Photo
+                                        </label>
+                                        <input type="file" id="notebook-file-input" accept="image/*" class="hide" required>
+                                        <span id="notebook-selected-filename" class="d-block mt-1"></span>
+                                    </div>
+                                </div>
+                                <button type="submit" class="gold-btn btn-block mt-3">Upload Notebook Page</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- SIDE-BY-SIDE TRANSCRIPTION WORKSPACE MODAL -->
+                    <div id="transcription-modal" class="modal hide">
+                        <div class="modal-content transcription-modal-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; gap: 10px; flex-wrap: wrap;">
+                                <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0; font-family: 'Cinzel', serif; color: var(--gold-light);"><i class="fa-solid fa-book-reader"></i> Digitization Workspace</h3>
+                                <div style="display:flex; gap:8px; flex-wrap: wrap;">
+                                    <button class="gold-btn-outline btn-sm" onclick="switchTab('tab-farmers'); toggleModal('transcription-modal', false)" style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-house"></i> Home</button>
+                                    <button class="gold-btn-outline btn-sm" onclick="toggleModal('transcription-modal', false)" style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                                </div>
+                            </div>
+                            
+                            <div class="transcription-workspace">
+                                <!-- Left Panel: Image Reader -->
+                                <div class="transcription-left">
+                                    <div class="image-viewer-header">
+                                        <span><i class="fa-solid fa-magnifying-glass-plus"></i> Image Viewer (Scroll to Zoom/Pan)</span>
+                                        <button class="gold-btn-outline btn-sm" onclick="resetNotebookImageZoom()"><i class="fa-solid fa-arrows-rotate"></i> Reset</button>
+                                    </div>
+                                    <div class="notebook-zoom-container">
+                                        <div class="scanner-line hide" id="scanner-line" style="position: absolute; width: 100%; height: 4px; background: linear-gradient(to right, transparent, var(--gold-light), transparent); box-shadow: 0 0 8px var(--gold-light); z-index: 50; pointer-events: none; animation: scanAnimation 2s infinite linear;"></div>
+                                        <img id="transcription-image" src="" alt="Notebook Page" style="position: relative;">
+                                    </div>
+                                    <div class="page-description-banner">
+                                        <strong>Description:</strong> <span id="transcription-page-desc">-</span>
+                                    </div>
+                                </div>
+
+                                <!-- Right Panel: Manual Entry Table Grid -->
+                                <div class="transcription-right">
+                                    <div class="workspace-section-header">
+                                        <h4><i class="fa-solid fa-keyboard"></i> Transcribe Transactions</h4>
+                                        <div style="display: flex; gap: 8px;">
+                                            <button class="gold-btn btn-sm" onclick="triggerAIScan()"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Scan Page</button>
+                                            <button class="gold-btn-outline btn-sm" onclick="addTranscriptionRow()"><i class="fa-solid fa-plus"></i> Add Row</button>
+                                        </div>
+                                    </div>
+                                    <p class="help-text">Type in the entries from the paper notebook image on the left.</p>
+
+                                    <!-- Table grid -->
+                                    <div class="transcription-table-wrapper">
+                                        <table class="transcription-table" id="transcription-table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 130px;">Date</th>
+                                                    <th style="width: 140px;">Type</th>
+                                                    <th style="width: 110px;">Amount (₹)</th>
+                                                    <th>Description / Remarks</th>
+                                                    <th style="width: 50px;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Dynamic rows added here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <button class="gold-btn btn-block mt-2" onclick="saveTranscribedLedgerEntries()"><i class="fa-solid fa-file-invoice"></i> Save Entries to Farmer Ledger</button>
+
+                                    <!-- INNER FORMULA INTEREST CALCULATOR -->
+                                    <div class="inner-calculator-panel mt-3">
+                                        <h4><i class="fa-solid fa-percent"></i> Calculate Interest on Transcribed Entries ("Inside" Calculator)</h4>
+                                        <p class="help-text">Select an advance transaction from the grid to compute simple or compound monthly interest dynamically.</p>
+                                        
+                                        <div class="inner-calc-grid mt-2">
+                                            <div class="form-group">
+                                                <label for="inner-calc-row-select">Select Advance Entry</label>
+                                                <select id="inner-calc-row-select" class="gold-select">
+                                                    <option value="">-- Select Row --</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="inner-calc-rate">Monthly Rate (%)</label>
+                                                <input type="number" step="0.01" id="inner-calc-rate" value="2.0">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="inner-calc-compounding">Compounding Type</label>
+                                                <select id="inner-calc-compounding" class="gold-select">
+                                                    <option value="SIMPLE">Simple Interest</option>
+                                                    <option value="MONTHLY">Compound Monthly</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="inner-calc-settle-date">Settlement Date</label>
+                                                <input type="date" id="inner-calc-settle-date">
+                                            </div>
+                                        </div>
+
+                                        <button class="gold-btn btn-block mt-2" onclick="calculateInnerRowInterest()"><i class="fa-solid fa-calculator"></i> Compute Interest</button>
+
+                                        <!-- Results display inside -->
+                                        <div class="inner-calc-results hide mt-2" id="inner-calc-results-box">
+                                            <div class="inner-result-line">
+                                                <span>Computed Interest:</span>
+                                                <strong id="inner-res-interest" class="gold-text">₹0.00</strong>
+                                            </div>
+                                            <div class="inner-result-line">
+                                                <span>Total Amount (P + I):</span>
+                                                <span id="inner-res-total">₹0.00</span>
+                                            </div>
+                                            <div class="inner-result-line">
+                                                <span>Duration:</span>
+                                                <span id="inner-res-duration">0 Months</span>
+                                            </div>
+                                            <button class="gold-btn btn-block mt-2" id="inner-post-btn"><i class="fa-solid fa-file-circle-plus"></i> Post Interest to Ledger</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+
+                <!-- 5. INTEREST CALCULATOR TAB (OUTSIDE / STANDALONE CALCULATOR) -->
+                <section id="tab-calculator" class="tab-panel">
+                    <h2 class="panel-title" id="calculator-panel-title">Interest Calculation Engine (Outside Calculator)</h2>
+                    <p class="panel-desc" id="calculator-panel-desc">Calculate simple or compound interest on farmer advances and optionally post directly to the ledger.</p>
+
+                    <div class="calculator-layout mt-3">
+                        <div class="glass-card calc-inputs">
+                            <h3>Calculator Configuration</h3>
+                            <form id="calc-form">
+                                <div class="form-group">
+                                    <label for="calc-farmer-select">Select Farmer Account (Optional)</label>
+                                    <select id="calc-farmer-select" class="gold-select">
+                                        <option value="">-- Run Standalone Calculator --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="calc-principal">Principal Amount (₹)</label>
+                                    <input type="number" step="0.01" id="calc-principal" placeholder="e.g. 10000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="calc-rate">Interest Rate (%)</label>
+                                    <div class="input-inline">
+                                        <input type="number" step="0.01" id="calc-rate" placeholder="e.g. 2.0" required>
+                                        <select id="calc-rate-type" class="gold-select shrink">
+                                            <option value="MONTHLY">Per Month</option>
+                                            <option value="YEARLY">Per Year</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="calc-compounding">Compounding Type</label>
+                                    <select id="calc-compounding" class="gold-select">
+                                        <option value="SIMPLE">Simple Interest</option>
+                                        <option value="MONTHLY">Compound Monthly</option>
+                                        <option value="YEARLY">Compound Annually</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="calc-start-date">Start Date (Date of Advance)</label>
+                                    <input type="date" id="calc-start-date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="calc-end-date">End Date (Settlement Date)</label>
+                                    <input type="date" id="calc-end-date" required>
+                                </div>
+                                <button type="submit" class="gold-btn btn-block mt-3"><i class="fa-solid fa-gears"></i> Calculate Interest</button>
+                            </form>
+                        </div>
+
+                        <!-- Calculation Results Output -->
+                        <div class="glass-card calc-outputs" id="calc-results-card">
+                            <h3>Calculation Summary</h3>
+                            <div class="calc-placeholder" id="calc-placeholder-text">
+                                <i class="fa-solid fa-calculator-alt"></i>
+                                <p>Fill the configuration form and click Calculate to display reports.</p>
+                            </div>
+                            <div class="calc-results-content hide" id="calc-results-details">
+                                <div class="result-row highlight">
+                                    <span>Interest Accrued</span>
+                                    <span id="res-interest" class="gold-text">₹0.00</span>
+                                </div>
+                                <div class="result-row highlight">
+                                    <span>Total Payable (P + I)</span>
+                                    <span id="res-total">₹0.00</span>
+                                </div>
+                                <div class="result-row">
+                                    <span>Duration in Days</span>
+                                    <span id="res-days">0 Days</span>
+                                </div>
+                                <div class="result-row">
+                                    <span>Duration in Months</span>
+                                    <span id="res-months">0.0 Months</span>
+                                </div>
+                                <div class="result-row">
+                                    <span>Duration in Years</span>
+                                    <span id="res-years">0.0 Years</span>
+                                </div>
+                                
+                                <div class="post-ledger-section mt-4 hide" id="post-ledger-actions">
+                                    <hr class="gold-hr">
+                                    <h4>Post Interest to Farmer's Account</h4>
+                                    <p class="small-text">Log this computed interest directly as a debit transaction inside the farmer's ledger.</p>
+                                    <div class="form-group mt-2">
+                                        <label for="post-desc">Remarks</label>
+                                        <input type="text" id="post-desc" value="Interest applied on loan">
+                                    </div>
+                                    <button type="button" id="post-interest-btn" class="gold-btn btn-block"><i class="fa-solid fa-file-signature"></i> Apply Interest to Ledger</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. TRADERS DIRECTORY TAB -->
+                <section id="tab-traders" class="tab-panel">
+                    <div class="panel-header-flex">
+                        <h2 class="panel-title" id="trader-directory-title">Traders Directory & Invoice Digitizer</h2>
+                    </div>
+
+                    <div class="split-view-container mt-2">
+                        <!-- Left Column: Traders List & Search -->
+                        <div class="split-left glass-card">
+                            <div class="search-bar-container">
+                                <input type="text" id="trader-search-input" placeholder="🔍 Search trader by name/location..." oninput="filterTradersList()">
+                                <button class="gold-btn mt-2 btn-block" onclick="openAddTraderFormInline()"><i class="fa-solid fa-user-plus"></i> Add New Trader</button>
+                            </div>
+                            <div class="farmers-list-wrapper mt-3">
+                                <ul id="traders-list" class="farmers-list-group">
+                                    <!-- Dynamic list items of traders -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Trader Details / Form / Returns -->
+                        <div class="split-right glass-card" id="trader-detail-view">
+                            <div id="trader-detail-placeholder" style="width: 100%;">
+                                <div class="detail-placeholder-message">
+                                    <i class="fa-solid fa-handshake"></i>
+                                    <p>Select a trader from the left directory to view details, track purchases, or process stock returns.</p>
+                                </div>
+                            </div>
+
+                            <!-- Detailed view -->
+                            <div class="farmer-detail-content hide" id="trader-detail-main-content">
+                                <div class="detail-profile-header">
+                                    <div class="profile-avatar-large">
+                                        <i class="fa-solid fa-building-flag" style="font-size: 2.5rem; color: var(--gold);"></i>
+                                    </div>
+                                    <div class="profile-info-block">
+                                        <h2 id="detail-trader-name">Trader Name</h2>
+                                        <p id="detail-trader-location"><i class="fa-solid fa-location-dot"></i> City/Location</p>
+                                        <div class="profile-actions-inline" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                                            <button class="gold-btn-outline btn-sm" onclick="clearTraderSelection()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                                            <button class="gold-btn-outline btn-sm" onclick="openEditTraderFormInline()"><i class="fa-solid fa-edit"></i> Edit</button>
+                                            <button class="gold-btn btn-sm" onclick="openTraderLedgerTab(selectedTraderId)"><i class="fa-solid fa-file-invoice-dollar"></i> Ledger</button>
+                                            <button class="gold-btn-danger btn-sm" onclick="deleteTrader(selectedTraderId)"><i class="fa-solid fa-trash"></i> Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="profile-details-grid mt-3">
+                                    <div class="detail-box">
+                                        <strong>Phone Number:</strong>
+                                        <span id="detail-trader-phone">-</span>
+                                    </div>
+                                    <div class="detail-box">
+                                        <strong>Supplied Items / Company:</strong>
+                                        <span id="detail-trader-items">-</span>
+                                    </div>
+                                </div>
+
+                                <hr class="gold-hr">
+
+                                <!-- RETURNS PROCESSING LOG -->
+                                <div class="returns-section mt-3">
+                                    <div class="section-title-flex">
+                                        <h3><i class="fa-solid fa-truck-ramp-box"></i> Return Processing (Returned Stock)</h3>
+                                        <button class="gold-btn-outline btn-sm" onclick="toggleModal('return-modal', true)"><i class="fa-solid fa-plus"></i> Log Stock Return</button>
+                                    </div>
+                                    <p class="section-subtitle">Log return of damaged or unsold stock to this trader. This will automatically deduct the return value from the trader's balance.</p>
+                                    <div class="table-responsive mt-2" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+                                        <table class="data-table small" id="trader-returns-table" style="margin: 0; font-size: 0.8rem;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Returned Item</th>
+                                                    <th>Quantity</th>
+                                                    <th>Total Value (₹)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Dynamic return rows -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <hr class="gold-hr">
+
+                                <!-- TRADER INVOICE OCR SECTION -->
+                                <div class="notebook-section">
+                                    <div class="section-title-flex">
+                                        <h3><i class="fa-solid fa-file-invoice"></i> Purchase Invoice Digitizer</h3>
+                                        <button class="gold-btn-outline btn-sm" onclick="toggleModal('trader-invoice-modal', true)"><i class="fa-solid fa-upload"></i> Upload Invoice</button>
+                                    </div>
+                                    <p class="section-subtitle">Upload dealer purchase invoices. Click to run OCR scan and auto-populate the ledger transactions.</p>
+                                    <div class="notebook-gallery mt-2" id="trader-invoice-gallery">
+                                        <!-- Dynamic invoice thumbnails -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Inline Trader Add/Edit Form -->
+                            <div class="farmer-detail-form-content hide" id="trader-detail-form-content" style="padding: 10px;">
+                                <h3 id="trader-inline-form-title" style="font-family: 'Cinzel', serif; color: var(--gold-light); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;"><i class="fa-solid fa-user-plus"></i> Add Trader Profile</h3>
+                                <form id="inline-trader-form" onsubmit="saveInlineTrader(event)">
+                                    <input type="hidden" id="inline-trader-id">
+                                    <div class="form-group mt-2">
+                                        <label for="inline-trader-name">Trader / Supplier Name</label>
+                                        <input type="text" id="inline-trader-name" placeholder="Enter company / merchant name" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-trader-phone">Phone Number</label>
+                                        <input type="tel" id="inline-trader-phone" placeholder="Enter phone number" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-trader-village">City / Location</label>
+                                        <input type="text" id="inline-trader-village" placeholder="Enter city" required>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="inline-trader-crop">Supplied Items / Brand</label>
+                                        <input type="text" id="inline-trader-crop" placeholder="e.g. Guntur Seeds, Coromandel Fertilizers" required>
+                                    </div>
+                                    <div class="form-actions mt-4" style="display: flex; gap: 10px;">
+                                        <button type="submit" class="gold-btn" style="flex: 1;">Save Profile</button>
+                                        <button type="button" class="gold-btn-outline" onclick="cancelTraderInlineForm()">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. TRADER LEDGER TAB -->
+                <section id="tab-traders-ledger" class="tab-panel">
+                    <h2 class="panel-title" id="trader-ledger-title">Trader Ledger & Supplier Accounts</h2>
+                    <div class="ledger-header-control glass-card">
+                        <div class="form-group">
+                            <label for="trader-ledger-selector" id="trader-ledger-selector-label">Select Trader Account</label>
+                            <select id="trader-ledger-selector" class="gold-select" onchange="loadTraderLedger(this.value)">
+                                <option value="">-- Select Trader --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="trader-ledger-details-container" class="hide">
+                        <!-- Summary Cards -->
+                        <div class="ledger-summary-grid mt-3">
+                            <div class="summary-box">
+                                <h3 id="trader-summary-bills-label">Total Sales Sent</h3>
+                                <p id="trader-summary-bills">₹0.00</p>
+                            </div>
+                            <div class="summary-box">
+                                <h3 id="trader-summary-payments-label">Total Payments Received</h3>
+                                <p id="trader-summary-payments">₹0.00</p>
+                            </div>
+                            <div class="summary-box balance-box">
+                                <h3 id="trader-summary-balance-label">Net Balance</h3>
+                                <p id="trader-summary-balance">₹0.00</p>
+                            </div>
+                        </div>
+
+                        <!-- Actions & Entries -->
+                        <div class="panel-header-flex mt-4">
+                            <h3>Ledger Entries</h3>
+                            <button class="gold-btn" onclick="toggleModal('trader-tx-modal', true)"><i class="fa-solid fa-plus"></i> Add Entry</button>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="glass-card mt-2">
+                            <div class="table-responsive">
+                                <table class="data-table" id="trader-ledger-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Description</th>
+                                            <th>Type</th>
+                                            <th>Lorry No</th>
+                                            <th>Tons</th>
+                                            <th>Rate/Ton</th>
+                                            <th>Other Charges</th>
+                                            <th id="trader-ledger-debit-header">Debit</th>
+                                            <th id="trader-ledger-credit-header">Credit</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- RETURN LOG MODAL -->
+            <div id="return-modal" class="modal hide">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="toggleModal('return-modal', false)">&times;</span>
+                    <h3><i class="fa-solid fa-truck-ramp-box"></i> Log Purchase Return</h3>
+                    <form id="return-form" onsubmit="saveReturnTransaction(event)">
+                        <div class="form-group mt-2">
+                            <label for="return-item">Item Name</label>
+                            <input type="text" id="return-item" placeholder="e.g. Urea fertilizer (damaged)" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="return-qty">Quantity</label>
+                            <input type="number" id="return-qty" min="1" placeholder="e.g. 5" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="return-amount">Total Return Credit Value (₹)</label>
+                            <input type="number" step="0.01" id="return-amount" placeholder="e.g. 7000" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="return-date">Return Date</label>
+                            <input type="date" id="return-date" required>
+                        </div>
+                        <button type="submit" class="gold-btn btn-block mt-3">Log Return</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TRADER INVOICE UPLOAD MODAL -->
+            <div id="trader-invoice-modal" class="modal hide">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="toggleModal('trader-invoice-modal', false)">&times;</span>
+                    <h3><i class="fa-solid fa-upload"></i> Upload Supplier Invoice</h3>
+                    <form id="trader-invoice-form" onsubmit="uploadTraderInvoice(event)">
+                        <div class="form-group mt-2">
+                            <label for="trader-invoice-notes">Invoice Notes / Reference</label>
+                            <input type="text" id="trader-invoice-notes" placeholder="e.g. Invoice #99011 - Paddy seeds wholesale" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label>Select Invoice Image</label>
+                            <div class="file-upload-wrapper">
+                                <label for="trader-invoice-file" class="gold-btn-outline btn-block">
+                                    <i class="fa-solid fa-file-arrow-up"></i> Choose Invoice Image
+                                </label>
+                                <input type="file" id="trader-invoice-file" accept="image/*" class="hide" required onchange="document.getElementById('trader-invoice-filename').innerText = this.files[0].name">
+                                <span id="trader-invoice-filename" class="d-block mt-1" style="font-size:0.8rem; color:var(--gold-light);"></span>
+                            </div>
+                        </div>
+                        <button type="submit" class="gold-btn btn-block mt-3">Upload Invoice</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- PROFILE INTEREST MODAL -->
+            <div id="profile-interest-modal" class="modal hide">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="toggleModal('profile-interest-modal', false)">&times;</span>
+                    <h3><i class="fa-solid fa-percent"></i> Calculate Account Interest</h3>
+                    <form id="profile-interest-form" onsubmit="runProfileInterestCalc(event)">
+                        <div class="form-group mt-2">
+                            <label for="prof-calc-principal">Principal Amount (₹)</label>
+                            <input type="number" step="0.01" id="prof-calc-principal" required placeholder="Principal amount">
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="prof-calc-rate">Monthly Rate (%)</label>
+                            <input type="number" step="0.01" id="prof-calc-rate" value="2.0" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label>Interest Type</label>
+                            <div style="display: flex; gap: 20px; margin-top: 5px;">
+                                <label><input type="radio" name="prof-interest-type" value="SIMPLE" checked> Simple Interest</label>
+                                <label><input type="radio" name="prof-interest-type" value="COMPOUND"> Compound Monthly</label>
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="prof-calc-start">Start Date (Date of Advance)</label>
+                            <input type="date" id="prof-calc-start" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="prof-calc-end">End Date (Settlement Date)</label>
+                            <input type="date" id="prof-calc-end" required>
+                        </div>
+                        
+                        <button type="submit" class="gold-btn btn-block mt-3">Calculate Interest</button>
+                    </form>
+                    
+                    <div class="calc-results-content hide mt-3 p-3 glass-card" id="profile-interest-results">
+                        <div class="result-row highlight" style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span>Accrued Interest:</span>
+                            <strong id="prof-res-interest" class="gold-text">₹0.00</strong>
+                        </div>
+                        <div class="result-row highlight" style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span>Total (P + I):</span>
+                            <span id="prof-res-total">₹0.00</span>
+                        </div>
+                        <div class="result-row" style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span>Duration:</span>
+                            <span id="prof-res-duration">0 Months</span>
+                        </div>
+                        <button class="gold-btn btn-block mt-2" onclick="postProfileInterestToLedger()"><i class="fa-solid fa-file-circle-plus"></i> Post Interest to Ledger</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRADER TRANSACTION MODAL -->
+            <div id="trader-tx-modal" class="modal hide">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="toggleModal('trader-tx-modal', false)">&times;</span>
+                    <h3 id="trader-tx-modal-title"><i class="fa-solid fa-plus-circle"></i> Log Trader Transaction</h3>
+                    <form id="trader-tx-form" onsubmit="saveTraderTransaction(event)">
+                        <div class="form-group mt-2">
+                            <label for="trader-tx-type">Transaction Type</label>
+                            <select id="trader-tx-type" class="gold-select" required onchange="onTraderTxTypeChange()">
+                                <option value="BILL">BILL</option>
+                                <option value="PAYMENT">PAYMENT</option>
+                            </select>
+                        </div>
+                        <div id="trader-shipment-fields">
+                            <div class="form-group mt-2">
+                                <label for="trader-tx-lorry">Lorry No</label>
+                                <input type="text" id="trader-tx-lorry" placeholder="e.g. TS09AB1234">
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="trader-tx-tons">Number of Tons</label>
+                                <input type="number" step="0.01" min="0" id="trader-tx-tons" placeholder="e.g. 18.5" oninput="calculateTraderAutoAmount()">
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="trader-tx-rate">Rate Per Ton (₹)</label>
+                                <input type="number" step="0.01" min="0" id="trader-tx-rate" placeholder="e.g. 22000" oninput="calculateTraderAutoAmount()">
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="trader-tx-charges">Other Charges (₹)</label>
+                                <input type="number" step="0.01" min="0" id="trader-tx-charges" value="0" oninput="calculateTraderAutoAmount()">
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="trader-tx-auto-amount">Auto Calculated Amount (₹)</label>
+                                <input type="number" step="0.01" id="trader-tx-auto-amount" readonly>
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="trader-tx-amount" id="trader-tx-amount-label">Amount (₹)</label>
+                            <input type="number" step="0.01" min="0.01" id="trader-tx-amount" placeholder="e.g. 50000" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="trader-tx-date">Date</label>
+                            <input type="date" id="trader-tx-date" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="trader-tx-desc">Description / Remarks</label>
+                            <input type="text" id="trader-tx-desc" placeholder="e.g. Bank payment, invoice settlement" required>
+                        </div>
+                        <button type="submit" class="gold-btn btn-block mt-3">Submit Transaction</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-notice" class="app-notice hide" role="status" aria-live="polite"></div>
+
+    <!-- Generic message modal (replaces alert/toast usage) -->
+    <div id="message-modal" class="modal hide" role="dialog" aria-modal="true" aria-labelledby="message-modal-title">
+        <div class="modal-content">
+            <span class="close-modal" onclick="toggleModal('message-modal', false)">&times;</span>
+            <h3 id="message-modal-title">Message</h3>
+            <div id="message-modal-body" class="message-body"></div>
+            <div class="modal-actions">
+                <button class="gold-btn" id="message-modal-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tesseract.js for OCR -->
+    <script async src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+    <!-- JS Core -->
+    <script src="app.js?v=10"></script>
+</body>
+</html>
